@@ -8,22 +8,21 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace HotelBookingSystem.Infrastructure.Migrations
-{
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251116210512_InitialDatabase")]
-    partial class InitialDatabase
-    {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
-        {
-#pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+namespace HotelBookingSystem.Infrastructure.Migrations;
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+[DbContext(typeof(ApplicationDbContext))]
+[Migration("20251116210512_InitialDatabase")]
+partial class InitialDatabase
+{
+    /// <inheritdoc />
+    protected override void BuildTargetModel(ModelBuilder modelBuilder)
+    {
+#pragma warning disable 612, 618
+        modelBuilder
+            .HasAnnotation("ProductVersion", "9.0.11")
+            .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+        SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 #pragma warning restore 612, 618
-        }
     }
 }

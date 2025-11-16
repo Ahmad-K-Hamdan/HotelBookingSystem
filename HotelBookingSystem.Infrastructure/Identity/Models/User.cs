@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace HotelBookingSystem.Infrastructure.Identity;
+namespace HotelBookingSystem.Infrastructure.Identity.Models;
 
 public class User : IdentityUser
 {

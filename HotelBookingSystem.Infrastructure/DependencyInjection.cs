@@ -2,20 +2,31 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using HotelBookingSystem.Application.Common.Interfaces;
+using HotelBookingSystem.Application.Common.Models;
+using HotelBookingSystem.Infrastructure.Identity.Services;
+using HotelBookingSystem.Infrastructure.Services;
 
-namespace HotelBookingSystem.Infrastructure
+namespace HotelBookingSystem.Infrastructure;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddInfrastructure(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastructure(
-            this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
-            );
+        // DbContext
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+        );
 
-            return services;
-        }
+        // Bind JWT
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+        // Services 
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IEmailService, EmailService>();
+
+        return services;
     }
 }
