@@ -4,8 +4,7 @@ namespace HotelBookingSystem.Application.Common.Interfaces;
 
 public interface IIdentityService
 {
-    Task<AuthResult> RegisterAsync(string firstName, string lastName, string email, string password,
-        DateTime? birthDate);
+    Task<AuthResult> RegisterAsync(RegisterUserModel registerUserModel);
     Task<AuthResult> LoginAsync(string email, string password);
 
     Task SendConfirmationEmailAsync(string email);

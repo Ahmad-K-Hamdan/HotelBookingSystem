@@ -1,4 +1,5 @@
 ﻿namespace HotelBookingSystem.Application.Common.Models;
+
 public class AuthResult
 {
     public bool Succeeded { get; set; }
