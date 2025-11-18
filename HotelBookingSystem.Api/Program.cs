@@ -3,7 +3,10 @@ using HotelBookingSystem.Api.Middleware;
 using HotelBookingSystem.Application;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure;
+using HotelBookingSystem.Infrastructure.Identity.Models;
+using HotelBookingSystem.Infrastructure.Identity.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -11,7 +14,7 @@ namespace HotelBookingSystem.Api;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +59,14 @@ public class Program
         builder.Services.AddAuthorization();
 
         var app = builder.Build();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            var userManager = services.GetRequiredService<UserManager<User>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            await IdentitySeeder.SeedAsync(userManager, roleManager);
+        }
 
         if (app.Environment.IsDevelopment())
         {
