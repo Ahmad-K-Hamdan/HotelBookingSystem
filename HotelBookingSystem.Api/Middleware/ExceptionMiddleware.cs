@@ -3,15 +3,26 @@ using System.Net;
 
 namespace HotelBookingSystem.Api.Middleware;
 
+/// <summary>
+/// Custom middleware for handling exceptions globally.
+/// </summary>
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
 
+    /// <summary>
+    /// Initializes a new instance of the ExceptionMiddleware class.
+    /// </summary>
+    /// <param name="next"> The next request delegate in the pipeline.</param>
     public ExceptionMiddleware(RequestDelegate next)
     {
         _next = next;
     }
 
+    /// <summary>
+    /// Invokes the middleware to handle HTTP requests asynchronously.
+    /// </summary>
+    /// <param name="context">The HTTP context.</param>
     public async Task InvokeAsync(HttpContext context)
     {
         try

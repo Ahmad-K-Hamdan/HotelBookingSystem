@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using MediatR;
@@ -26,7 +27,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
 
         if (!result.Succeeded)
         {
-            throw new Exception(result.Error);
+            throw new IdentityException(result!.Error ?? "An issue has occurred.");
         }
 
         return new RegisterResponseDto

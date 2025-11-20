@@ -8,12 +8,19 @@ using HotelBookingSystem.Infrastructure.Identity.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 using System.Text;
 
 namespace HotelBookingSystem.Api;
 
+/// <summary>
+/// The main entry point for the application.
+/// </summary>
 public class Program
 {
+    /// <summary>
+    /// The application's main method.
+    /// </summary>
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +36,10 @@ public class Program
             {
                 Title = "Hotel Booking API"
             });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            options.IncludeXmlComments(xmlPath);
         });
 
         var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
