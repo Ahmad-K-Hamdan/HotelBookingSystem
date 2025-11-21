@@ -35,14 +35,47 @@ public class IdentityService : IIdentityService
     }
 
     /// <summary>
-    /// Confirms a user's email address using a token.
+    /// Registers a new user, assigns the "User" role, and returns a JWT authentication result on success.
     /// </summary>
-    /// <param name="email">The user's email.</param>
-    /// <param name="token">The email confirmation token.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task ConfirmEmailAsync(string email, string token)
+    /// <param name="registerUserModel">The model containing registration details.</param>
+    /// <returns>An AuthResult indicating success or failure and containing a JWT token if successful.</returns>
+    public async Task<AuthResult> RegisterAsync(RegisterUserModel registerUserModel)
     {
-        throw new NotImplementedException();
+        var existing = await _userManager.FindByEmailAsync(registerUserModel.Email);
+
+        if (existing != null)
+        {
+            return new AuthResult
+            {
+                Succeeded = false,
+                Error = "The email is used."
+            };
+        }
+
+        var user = _mapper.Map<User>(registerUserModel);
+
+        var result = await _userManager.CreateAsync(user, registerUserModel.Password);
+
+        if (!result.Succeeded)
+        {
+            return new AuthResult
+            {
+                Succeeded = false,
+                Error = result.Errors.ToString()!
+            };
+        }
+
+        await _userManager.AddToRoleAsync(user, "User");
+        //await SendConfirmationEmailAsync(user.Email!);
+
+        var token = await GenerateJwtAsync(user);
+
+        return new AuthResult
+        {
+            Succeeded = true,
+            UserId = user.Id,
+            Token = token
+        };
     }
 
     /// <summary>
@@ -95,63 +128,6 @@ public class IdentityService : IIdentityService
     }
 
     /// <summary>
-    /// Registers a new user, assigns the "User" role, and returns a JWT authentication result on success.
-    /// </summary>
-    /// <param name="registerUserModel">The model containing registration details.</param>
-    /// <returns>An AuthResult indicating success or failure and containing a JWT token if successful.</returns>
-    public async Task<AuthResult> RegisterAsync(RegisterUserModel registerUserModel)
-    {
-        var existing = await _userManager.FindByEmailAsync(registerUserModel.Email);
-
-        if (existing != null)
-        {
-            return new AuthResult
-            {
-                Succeeded = false,
-                Error = "The email is used."
-            };
-        }
-
-        var user = _mapper.Map<User>(registerUserModel);
-
-        var result = await _userManager.CreateAsync(user, registerUserModel.Password);
-
-        if (!result.Succeeded)
-        {
-            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
-            return new AuthResult
-            {
-                Succeeded = false,
-                Error = errors
-            };
-        }
-
-        await _userManager.AddToRoleAsync(user, "User");
-        //await SendConfirmationEmailAsync(user.Email!);
-
-        var token = await GenerateJwtAsync(user);
-
-        return new AuthResult
-        {
-            Succeeded = true,
-            UserId = user.Id,
-            Token = token
-        };
-    }
-
-    /// <summary>
-    /// Resets a user's password.
-    /// </summary>
-    /// <param name="email">The user's email.</param>
-    /// <param name="token">The password reset token.</param>
-    /// <param name="newPassword">The new password.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task ResetPasswordAsync(string email, string token, string newPassword)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
     /// Sends a confirmation email to the user.
     /// </summary>
     /// <param name="email">The user's email address.</param>
@@ -162,11 +138,34 @@ public class IdentityService : IIdentityService
     }
 
     /// <summary>
+    /// Confirms a user's email address using a token.
+    /// </summary>
+    /// <param name="email">The user's email.</param>
+    /// <param name="token">The email confirmation token.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    public Task ConfirmEmailAsync(string email, string token)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
     /// Sends a password reset email to the user.
     /// </summary>
     /// <param name="email">The user's email address.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     public Task SendPasswordResetEmailAsync(string email)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Resets a user's password.
+    /// </summary>
+    /// <param name="email">The user's email.</param>
+    /// <param name="token">The password reset token.</param>
+    /// <param name="newPassword">The new password.</param>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    public Task ResetPasswordAsync(string email, string token, string newPassword)
     {
         throw new NotImplementedException();
     }

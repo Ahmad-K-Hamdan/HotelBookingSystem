@@ -29,11 +29,13 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .Matches("[A-Z]").WithMessage("Password must contain at least one uppercase letter.")
             .Matches("[a-z]").WithMessage("Password must contain at least one lowercase letter.")
             .Matches("[0-9]").WithMessage("Password must contain at least one number.")
-            .Matches("[^a-zA-Z0-9]").WithMessage("Password must contain at least one special character.")
-            .Matches("^\\S+$").WithMessage("Password cannot contain spaces.");
+            .Matches("[@!_.,-]").WithMessage("Password must contain at least one special character.")
+            .Matches("^\\S+$").WithMessage("Password cannot contain spaces.")
+            .Matches("^[A-Za-z0-9@!_.,-]*$")
+            .WithMessage("Password contains illegal characters. Only English letters, numbers, and (@, !, _, ., -) are allowed.");
 
         RuleFor(x => x.BirthDate)
-            .Must(date => date <= DateTime.Today.AddYears(-18)).WithMessage("You must be at least 18 years old.")
-            .When(x => x.BirthDate.HasValue);
+            .NotEmpty().WithMessage("Birth Date is required.")
+            .Must(date => date <= DateTime.Today.AddYears(-18)).WithMessage("You must be at least 18 years old.");
     }
 }

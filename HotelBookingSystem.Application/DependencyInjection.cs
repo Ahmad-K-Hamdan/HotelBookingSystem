@@ -1,6 +1,8 @@
 ﻿using AutoMapper.Internal;
 using FluentValidation;
+using HotelBookingSystem.Application.Behaviors;
 using HotelBookingSystem.Application.Mappings;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -18,6 +20,9 @@ public static class DependencyInjection
 
         // Fluent Validation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Register the behavior into MediatR pipeline
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
         // Auto mapper
         // Turned off auto mapping because it threw an error while mapping DTOs
