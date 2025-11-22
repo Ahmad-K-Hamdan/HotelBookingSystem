@@ -44,7 +44,18 @@ public class Program
 
         var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
         builder.Services.Configure<JwtSettings>(jwtSettingsSection);
+
         var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
+
+        if (jwtSettings != null)
+        {
+            builder.Services.AddSingleton(jwtSettings);
+        }
+
+        else if (jwtSettings == null)
+        {
+            throw new InvalidOperationException("JwtSettings configuration section is missing or invalid.");
+        }
 
         builder.Services
             .AddAuthentication(options =>

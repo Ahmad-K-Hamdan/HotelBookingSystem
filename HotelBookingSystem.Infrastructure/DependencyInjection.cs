@@ -11,6 +11,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SendGrid;
 
 namespace HotelBookingSystem.Infrastructure;
 
@@ -24,6 +27,9 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
         );
+
+        // SendGrid Service
+        AddSendGridService(services, configuration);
 
         // ASP.NET Identity
         services.AddIdentity<User, IdentityRole>(options =>
@@ -49,6 +55,46 @@ public static class DependencyInjection
         {
             cfg.Internal().MethodMappingEnabled = false;
         }, typeof(IdentityMappingProfile).Assembly);
+
+        return services;
+    }
+
+    private static IServiceCollection AddSendGridService(this IServiceCollection services, IConfiguration configuration)
+    {
+        // Bind SendGridSettings
+        var sendGridSection = configuration.GetSection("SendGridSettings");
+        services.Configure<SendGridSettings>(sendGridSection);
+
+        var sendGridSettings = sendGridSection.Get<SendGridSettings>();
+
+        // Validate config
+        if (string.IsNullOrWhiteSpace(sendGridSettings?.ApiKey))
+        {
+            throw new InvalidOperationException("SendGrid API Key is missing. Please set SendGridSettings:ApiKey in appsettings.json");
+        }
+
+        if (string.IsNullOrWhiteSpace(sendGridSettings.FromEmail))
+        {
+            throw new InvalidOperationException("SendGrid 'FromEmail' is missing in SendGridSettings.");
+        }
+
+        if (string.IsNullOrWhiteSpace(sendGridSettings.FromName))
+        {
+            throw new InvalidOperationException("SendGrid 'FromName' is missing in SendGridSettings.");
+        }
+
+        // Register SendGrid Client
+        services.AddSingleton<ISendGridClient>(_ => new SendGridClient(sendGridSettings.ApiKey));
+
+        // Register EmailService
+        services.AddScoped<IEmailService>(sp =>
+        {
+            var opts = sp.GetRequiredService<IOptions<SendGridSettings>>();
+            var logger = sp.GetRequiredService<ILogger<EmailService>>();
+            var client = sp.GetRequiredService<ISendGridClient>();
+
+            return new EmailService(opts, logger, client);
+        });
 
         return services;
     }

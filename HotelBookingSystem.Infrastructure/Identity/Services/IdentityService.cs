@@ -7,13 +7,16 @@ using Microsoft.AspNetCore.Identity;
 namespace HotelBookingSystem.Infrastructure.Identity.Services;
 
 /// <summary>
-/// Service class responsible for handling identity-related operations such as user registration, login, and email confirmation.
+/// Service class responsible for handling identity-related operations such as 
+/// user registration, login, email confirmation and password reset.
 /// </summary>
 public class IdentityService : IIdentityService
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
+    private readonly IEmailService _emailService;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly JwtSettings _jwtSettings;
     private readonly IMapper _mapper;
 
     /// <summary>
@@ -21,17 +24,23 @@ public class IdentityService : IIdentityService
     /// </summary>
     /// <param name="userManager">The user manager instance.</param>
     /// <param name="signInManager">The sign-in manager instance.</param>
+    /// <param name="emailService">Service responsible for sending emails.</param>
     /// <param name="jwtTokenGenerator">The JWT token generator instance.</param>
-    /// <param name="mapper">The AutoMapper instance.</param>
+    /// <param name="jwtSettings">Configuration settings for JWT generation.</param>
+    /// <param name="mapper">The AutoMapper instance.</param>           
     public IdentityService(UserManager<User> userManager,
         IJwtTokenGenerator jwtTokenGenerator,
         IMapper mapper,
-        SignInManager<User> signInManager)
+        SignInManager<User> signInManager,
+        JwtSettings jwtSettings,
+        IEmailService emailService)
     {
         _userManager = userManager;
         _jwtTokenGenerator = jwtTokenGenerator;
         _mapper = mapper;
         _signInManager = signInManager;
+        _jwtSettings = jwtSettings;
+        _emailService = emailService;
     }
 
     /// <summary>
@@ -61,20 +70,23 @@ public class IdentityService : IIdentityService
             return new AuthResult
             {
                 Succeeded = false,
-                Error = result.Errors.ToString()!
+                Error = string.Join("; ", result.Errors.Select(e => e.Description))
             };
         }
 
         await _userManager.AddToRoleAsync(user, "User");
-        //await SendConfirmationEmailAsync(user.Email!);
 
-        var token = await GenerateJwtAsync(user);
+        try
+        {
+            await SendConfirmationEmailAsync(user.Email!);
+        }
+        catch (Exception) { }
 
         return new AuthResult
         {
             Succeeded = true,
             UserId = user.Id,
-            Token = token
+            Token = null!
         };
     }
 
@@ -128,13 +140,26 @@ public class IdentityService : IIdentityService
     }
 
     /// <summary>
-    /// Sends a confirmation email to the user.
+    /// Generates an email confirmation token and sends the confirmation link to the specified email.
     /// </summary>
     /// <param name="email">The user's email address.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task SendConfirmationEmailAsync(string email)
+    public async Task SendConfirmationEmailAsync(string email)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return;
+        }
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encoded = Uri.EscapeDataString(token);
+
+        var url = $"{_jwtSettings.ConfirmEmailUrl}?email={Uri.EscapeDataString(email)}&token={encoded}";
+
+        await _emailService.SendEmailAsync(email, "Confirm your account",
+            $"Click the link to confirm your account: {url}");
     }
 
     /// <summary>
@@ -142,20 +167,61 @@ public class IdentityService : IIdentityService
     /// </summary>
     /// <param name="email">The user's email.</param>
     /// <param name="token">The email confirmation token.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task ConfirmEmailAsync(string email, string token)
+    /// <returns>An AuthResult indicating whether the operation succeeded.</returns>
+    public async Task<AuthResult> ConfirmEmailAsync(string email, string token)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return new AuthResult
+            {
+                Succeeded = false,
+                Error = "Confirmation failed due to an unknown error."
+            };
+        }
+
+        var decoded = Uri.UnescapeDataString(token);
+        var result = await _userManager.ConfirmEmailAsync(user, decoded);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return new AuthResult
+            {
+                Succeeded = false,
+                Error = errors
+            };
+        }
+
+        return new AuthResult
+        {
+            Succeeded = true,
+            UserId = user.Id
+        };
     }
 
     /// <summary>
-    /// Sends a password reset email to the user.
+    /// Generates a password reset token and sends a password reset link to the specified email.
     /// </summary>
     /// <param name="email">The user's email address.</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task SendPasswordResetEmailAsync(string email)
+    public async Task SendPasswordResetEmailAsync(string email)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return;
+        }
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var encoded = Uri.EscapeDataString(token);
+
+        var url = $"{_jwtSettings.ResetPasswordUrl}?email={Uri.EscapeDataString(email)}&token={encoded}";
+
+        await _emailService.SendEmailAsync(email, "Reset your password",
+            $"Click the link to reset your password: {url}");
     }
 
     /// <summary>
@@ -164,10 +230,38 @@ public class IdentityService : IIdentityService
     /// <param name="email">The user's email.</param>
     /// <param name="token">The password reset token.</param>
     /// <param name="newPassword">The new password.</param>
-    /// <returns>A task that represents the asynchronous operation.</returns>
-    public Task ResetPasswordAsync(string email, string token, string newPassword)
+    /// <returns>An AuthResult indicating whether the operation succeeded.</returns>
+    public async Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword)
     {
-        throw new NotImplementedException();
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            return new AuthResult
+            {
+                Succeeded = false,
+                Error = "Reset password failed due to an unknown error."
+            };
+        }
+
+        var decoded = Uri.UnescapeDataString(token);
+        var result = await _userManager.ResetPasswordAsync(user, decoded, newPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return new AuthResult
+            {
+                Succeeded = false,
+                Error = errors
+            };
+        }
+
+        return new AuthResult
+        {
+            Succeeded = true,
+            UserId = user.Id
+        };
     }
 
     private async Task<string> GenerateJwtAsync(User user)

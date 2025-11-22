@@ -1,4 +1,6 @@
-﻿using HotelBookingSystem.Application.Authentication.Commands.Login;
+﻿using HotelBookingSystem.Application.Authentication.Commands.EmailConfirmation;
+using HotelBookingSystem.Application.Authentication.Commands.Login;
+using HotelBookingSystem.Application.Authentication.Commands.PasswordReset;
 using HotelBookingSystem.Application.Authentication.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -53,5 +55,65 @@ public class AuthController : ControllerBase
     {
         var result = await _mediator.Send(command);
         return Ok(result);
+    }
+
+    /// <summary>
+    /// Requests the server to generate and send a new email confirmation link to the specified address.
+    /// Used if the initial email was not received.
+    /// </summary>
+    /// <param name="command">The command containing the email address.</param>
+    /// <returns>Always returns 200 OK (No Content) for security reasons.</returns>
+    [HttpPost("send-confirmation")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> SendConfirmation([FromBody] SendConfirmationEmailCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Confirms the user's email address using the token received in the email link.
+    /// </summary>
+    /// <param name="command">The command containing the user's email and the confirmation token.</param>
+    /// <returns>Success status (200 OK) upon successful confirmation.</returns>
+    [HttpPost("confirm-email")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Initiates the password reset process. Requests the server to generate and send a password reset link to the specified email.
+    /// </summary>
+    /// <param name="command">The command containing the email address.</param>
+    /// <returns>Always returns 200 OK (No Content) for security reasons.</returns>
+    [HttpPost("forgot-password")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommand command)
+    {
+        await _mediator.Send(command);
+        return Ok();
+    }
+
+    /// <summary>
+    /// Resets the user's password using the token received from the forgot-password email.
+    /// </summary>
+    /// <param name="command">The command containing email, token, and the new password.</param>
+    /// <returns>Success status (200 OK) upon successful password reset.</returns>
+    [HttpPost("reset-password")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommand command)
+    {
+        // The handler is responsible for throwing an IdentityException if the reset fails
+        await _mediator.Send(command);
+        return Ok();
     }
 }

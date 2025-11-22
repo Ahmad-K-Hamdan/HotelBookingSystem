@@ -8,8 +8,8 @@ public interface IIdentityService
     Task<AuthResult> LoginAsync(string email, string password);
 
     Task SendConfirmationEmailAsync(string email);
-    Task ConfirmEmailAsync(string email, string token);
+    Task<AuthResult> ConfirmEmailAsync(string email, string token);
 
     Task SendPasswordResetEmailAsync(string email);
-    Task ResetPasswordAsync(string email, string token, string newPassword);
+    Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword);
 }
