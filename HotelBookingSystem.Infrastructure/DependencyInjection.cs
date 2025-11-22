@@ -1,4 +1,5 @@
 ﻿using AutoMapper.Internal;
+using HotelBookingSystem.Application.Common.Exceptions.Handlers;
 using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure.Data;
@@ -49,6 +50,11 @@ public static class DependencyInjection
         // Services 
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
+
+        // Handlers
+        services.AddTransient<IExceptionHandler, ValidationExceptionHandler>();
+        services.AddTransient<IExceptionHandler, IdentityExceptionHandler>();
+        services.AddTransient<IExceptionHandler, DefaultExceptionHandler>();
 
         // Auto mapper
         services.AddAutoMapper(cfg =>

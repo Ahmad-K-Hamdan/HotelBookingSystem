@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-using HotelBookingSystem.Application.Common.Exceptions;
-using System.Net;
+﻿using HotelBookingSystem.Application.Common.Interfaces;
 
 namespace HotelBookingSystem.Api.Middleware;
 
@@ -11,16 +9,19 @@ public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionMiddleware> _logger;
+    private readonly IEnumerable<IExceptionHandler> _handlers;
 
     /// <summary>
     /// Initializes a new instance of the ExceptionMiddleware class.
     /// </summary>
     /// <param name="next">The next request delegate in the pipeline.</param>
     /// <param name="logger">The logger instance.</param>
-    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    /// <param name="handlers">A list of all exception handlers.</param>
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IEnumerable<IExceptionHandler> handlers)
     {
         _next = next;
         _logger = logger;
+        _handlers = handlers;
     }
 
     /// <summary>
@@ -35,51 +36,13 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
-            await HandleExceptionAsync(context, ex, _logger);
+            var handler = _handlers.First(h => h.CanHandle(ex));
+            var responseModel = handler.Handle(ex);
+
+            context.Response.StatusCode = responseModel.StatusCode;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsJsonAsync(responseModel);
         }
-    }
-
-    private static Task HandleExceptionAsync(HttpContext context, Exception ex, ILogger logger)
-    {
-        context.Response.ContentType = "application/json";
-
-        int statusCode = (int)HttpStatusCode.InternalServerError;
-        object responseBody = new
-        {
-            Message = "An unexpected error occurred.",
-            ErrorType = "InternalServerError"
-        };
-
-        logger.LogError(ex, "An unhandled exception occurred during request processing.");
-
-        switch (ex)
-        {
-            case ValidationException validationEx:
-                statusCode = (int)HttpStatusCode.BadRequest;
-                responseBody = new
-                {
-                    Message = "One or more validation errors occurred.",
-                    ErrorType = validationEx.GetType().Name,
-                    Errors = validationEx.Errors
-                        .GroupBy(f => f.PropertyName)
-                        .ToDictionary(
-                            g => g.Key,
-                            g => g.Select(e => e.ErrorMessage).ToArray()
-                        )
-                };
-                break;
-
-            case IdentityException identityEx:
-                statusCode = (int)HttpStatusCode.BadRequest;
-                responseBody = new
-                {
-                    Message = identityEx.Message,
-                    ErrorType = identityEx.GetType().Name
-                };
-                break;
-        }
-
-        context.Response.StatusCode = statusCode;
-        return context.Response.WriteAsJsonAsync(responseBody);
     }
 }
