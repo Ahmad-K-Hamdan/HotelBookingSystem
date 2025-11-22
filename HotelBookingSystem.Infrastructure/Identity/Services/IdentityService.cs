@@ -3,6 +3,7 @@ using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace HotelBookingSystem.Infrastructure.Identity.Services;
 
@@ -32,14 +33,14 @@ public class IdentityService : IIdentityService
         IJwtTokenGenerator jwtTokenGenerator,
         IMapper mapper,
         SignInManager<User> signInManager,
-        JwtSettings jwtSettings,
+        IOptions<JwtSettings> jwtSettings,
         IEmailService emailService)
     {
         _userManager = userManager;
         _jwtTokenGenerator = jwtTokenGenerator;
         _mapper = mapper;
         _signInManager = signInManager;
-        _jwtSettings = jwtSettings;
+        _jwtSettings = jwtSettings.Value;
         _emailService = emailService;
     }
 
@@ -85,8 +86,7 @@ public class IdentityService : IIdentityService
         return new AuthResult
         {
             Succeeded = true,
-            UserId = user.Id,
-            Token = null!
+            UserId = user.Id
         };
     }
 

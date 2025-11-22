@@ -1,6 +1,8 @@
 
 using HotelBookingSystem.Api.Middleware;
 using HotelBookingSystem.Application;
+using HotelBookingSystem.Application.Common.Exceptions.Handlers;
+using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure;
 using HotelBookingSystem.Infrastructure.Identity.Models;
@@ -25,9 +27,11 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // Application & Infrastructure Layers
         builder.Services.AddApplication();
         builder.Services.AddInfrastructure(builder.Configuration);
 
+        // Controllers & Swagger
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
@@ -37,25 +41,20 @@ public class Program
                 Title = "Hotel Booking API"
             });
 
+            // Load XML docs for Swagger
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            options.IncludeXmlComments(xmlPath);
+            if (File.Exists(xmlPath))
+            {
+                options.IncludeXmlComments(xmlPath);
+            }
         });
 
-        var jwtSettingsSection = builder.Configuration.GetSection("JwtSettings");
-        builder.Services.Configure<JwtSettings>(jwtSettingsSection);
+        // JWT Authentication Setup
+        builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
-        var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
-
-        if (jwtSettings != null)
-        {
-            builder.Services.AddSingleton(jwtSettings);
-        }
-
-        else if (jwtSettings == null)
-        {
-            throw new InvalidOperationException("JwtSettings configuration section is missing or invalid.");
-        }
+        var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
+            ?? throw new InvalidOperationException("Missing JwtSettings configuration.");
 
         builder.Services
             .AddAuthentication(options =>
@@ -80,8 +79,14 @@ public class Program
 
         builder.Services.AddAuthorization();
 
+        // Exception Handlers Registration
+        builder.Services.AddTransient<IExceptionHandler, ValidationExceptionHandler>();
+        builder.Services.AddTransient<IExceptionHandler, IdentityExceptionHandler>();
+        builder.Services.AddTransient<IExceptionHandler, DefaultExceptionHandler>();
+
         var app = builder.Build();
 
+        // Seed Identity Roles & Admin User
         using (var scope = app.Services.CreateScope())
         {
             var services = scope.ServiceProvider;
@@ -90,13 +95,17 @@ public class Program
             await IdentitySeeder.SeedAsync(userManager, roleManager);
         }
 
+        // Swagger in Development
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
         }
 
+        // Global Exception Handling Middleware
         app.UseMiddleware<ExceptionMiddleware>();
+
+        // Standard ASP.NET Core Pipeline
         app.UseHttpsRedirection();
 
         app.UseAuthentication();

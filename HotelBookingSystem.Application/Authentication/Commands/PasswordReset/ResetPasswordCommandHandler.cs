@@ -21,7 +21,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
 
         if (!result.Succeeded)
         {
-            throw new IdentityException(result.Error ?? "Email confirmation failed.");
+            throw new IdentityException(result.Error ?? "Password reset failed.");
         }
 
         return result;

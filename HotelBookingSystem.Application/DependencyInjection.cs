@@ -1,6 +1,8 @@
 ﻿using AutoMapper.Internal;
 using FluentValidation;
 using HotelBookingSystem.Application.Behaviors;
+using HotelBookingSystem.Application.Common.Exceptions.Handlers;
+using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Mappings;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;

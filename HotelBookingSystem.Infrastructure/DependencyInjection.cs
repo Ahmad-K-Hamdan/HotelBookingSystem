@@ -51,11 +51,6 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
 
-        // Handlers
-        services.AddTransient<IExceptionHandler, ValidationExceptionHandler>();
-        services.AddTransient<IExceptionHandler, IdentityExceptionHandler>();
-        services.AddTransient<IExceptionHandler, DefaultExceptionHandler>();
-
         // Auto mapper
         services.AddAutoMapper(cfg =>
         {

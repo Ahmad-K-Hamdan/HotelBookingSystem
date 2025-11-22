@@ -13,7 +13,6 @@ public class LoginCommandValidator : AbstractValidator<LoginCommand>
 
         RuleFor(x => x.Password)
             .NotEmpty()
-            .MinimumLength(8)
             .Matches("^[A-Za-z0-9@!_.,-]*$")
             .WithMessage("Password contains illegal characters. Only English letters, numbers, and (@, !, _, ., -) are allowed.");
     }

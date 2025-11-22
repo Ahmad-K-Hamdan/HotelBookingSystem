@@ -7,9 +7,9 @@ namespace HotelBookingSystem.Application.Common.Exceptions.Handlers;
 
 public class IdentityExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<DefaultExceptionHandler> _logger;
+    private readonly ILogger<IdentityExceptionHandler> _logger;
 
-    public IdentityExceptionHandler(ILogger<DefaultExceptionHandler> logger)
+    public IdentityExceptionHandler(ILogger<IdentityExceptionHandler> logger)
     {
         _logger = logger;
     }

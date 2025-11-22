@@ -32,8 +32,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
 
         return new RegisterResponseDto
         {
-            UserId = result.UserId,
-            Token = result.Token
+            UserId = result.UserId
         };
     }
 }

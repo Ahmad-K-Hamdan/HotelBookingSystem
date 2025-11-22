@@ -8,9 +8,9 @@ namespace HotelBookingSystem.Application.Common.Exceptions.Handlers;
 
 public class ValidationExceptionHandler : IExceptionHandler
 {
-    private readonly ILogger<DefaultExceptionHandler> _logger;
+    private readonly ILogger<ValidationExceptionHandler> _logger;
 
-    public ValidationExceptionHandler(ILogger<DefaultExceptionHandler> logger)
+    public ValidationExceptionHandler(ILogger<ValidationExceptionHandler> logger)
     {
         _logger = logger;
     }

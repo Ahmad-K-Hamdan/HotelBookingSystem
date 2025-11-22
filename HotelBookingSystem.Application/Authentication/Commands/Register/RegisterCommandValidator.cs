@@ -10,13 +10,13 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
             .NotEmpty()
             .MaximumLength(100)
             .Matches("^[A-Za-z]+$").WithMessage("First name must contain only letters.")
-            .Must(x => x.Trim() == x).WithMessage("First name cannot start or end with spaces."); ;
+            .Must(x => x.Trim() == x).WithMessage("First name cannot start or end with spaces.");
 
         RuleFor(x => x.LastName)
             .NotEmpty()
             .MaximumLength(100)
             .Matches("^[A-Za-z]+$").WithMessage("Last name must contain only letters.")
-            .Must(x => x.Trim() == x).WithMessage("Last name cannot start or end with spaces."); ;
+            .Must(x => x.Trim() == x).WithMessage("Last name cannot start or end with spaces.");
 
         RuleFor(x => x.Email)
             .EmailAddress()

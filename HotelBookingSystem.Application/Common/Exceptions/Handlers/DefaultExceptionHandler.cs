@@ -1,5 +1,6 @@
 ﻿using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
 
@@ -22,7 +23,7 @@ public class DefaultExceptionHandler : IExceptionHandler
 
         return new ErrorResponse
         {
-            StatusCode = (int)HttpStatusCode.BadRequest,
+            StatusCode = StatusCodes.Status500InternalServerError,
             Message = "An unexpected error occurred.",
             ErrorType = "InternalServerError"
         };

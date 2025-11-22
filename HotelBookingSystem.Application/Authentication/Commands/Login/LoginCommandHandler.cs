@@ -25,7 +25,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponseDt
 
         return new LoginResponseDto
         {
-            Token = result.Token
+            Token = result.Token!
         };
     }
 }
