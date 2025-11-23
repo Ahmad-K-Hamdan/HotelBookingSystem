@@ -1,6 +1,8 @@
-﻿using HotelBookingSystem.Domain.Enums;
+﻿using HotelBookingSystem.Domain.Entities.Bookings;
+using HotelBookingSystem.Domain.Entities.Discounts;
+using HotelBookingSystem.Domain.Enums;
 
-namespace HotelBookingSystem.Domain.Entities;
+namespace HotelBookingSystem.Domain.Entities.Payments;
 
 public class Payment
 {

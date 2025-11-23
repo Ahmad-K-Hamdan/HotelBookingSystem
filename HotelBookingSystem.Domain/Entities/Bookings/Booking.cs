@@ -1,4 +1,9 @@
-﻿namespace HotelBookingSystem.Domain.Entities;
+﻿using HotelBookingSystem.Domain.Entities.Guests;
+using HotelBookingSystem.Domain.Entities.Hotels;
+using HotelBookingSystem.Domain.Entities.Payments;
+using HotelBookingSystem.Domain.Entities.Rooms;
+
+namespace HotelBookingSystem.Domain.Entities.Bookings;
 
 public class Booking
 {

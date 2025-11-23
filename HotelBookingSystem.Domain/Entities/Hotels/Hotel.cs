@@ -1,4 +1,10 @@
-﻿namespace HotelBookingSystem.Domain.Entities;
+﻿using HotelBookingSystem.Domain.Entities.Bookings;
+using HotelBookingSystem.Domain.Entities.Cities;
+using HotelBookingSystem.Domain.Entities.Discounts;
+using HotelBookingSystem.Domain.Entities.Reviews;
+using HotelBookingSystem.Domain.Entities.Rooms;
+
+namespace HotelBookingSystem.Domain.Entities.Hotels;
 
 public class Hotel
 {
@@ -13,7 +19,7 @@ public class Hotel
     public decimal Longitude { get; set; }
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public City City { get; set; } = null!;
     public HotelGroup HotelGroup { get; set; } = null!;

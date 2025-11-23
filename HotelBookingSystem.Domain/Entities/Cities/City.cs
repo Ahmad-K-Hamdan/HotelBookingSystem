@@ -1,9 +1,12 @@
-﻿namespace HotelBookingSystem.Domain.Entities;
+﻿using HotelBookingSystem.Domain.Entities.Hotels;
 
-public class HotelGroup
+namespace HotelBookingSystem.Domain.Entities.Cities;
+
+public class City
 {
     public Guid Id { get; set; }
-    public string GroupName { get; set; } = null!;
+    public string CityName { get; set; } = null!;
+    public string CountryName { get; set; } = null!;
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

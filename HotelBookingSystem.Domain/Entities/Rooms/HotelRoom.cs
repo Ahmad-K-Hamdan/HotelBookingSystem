@@ -1,4 +1,6 @@
-﻿namespace HotelBookingSystem.Domain.Entities;
+﻿using HotelBookingSystem.Domain.Entities.Bookings;
+
+namespace HotelBookingSystem.Domain.Entities.Rooms;
 
 public class HotelRoom
 {

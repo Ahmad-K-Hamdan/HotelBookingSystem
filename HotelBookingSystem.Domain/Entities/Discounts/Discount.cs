@@ -1,4 +1,7 @@
-﻿namespace HotelBookingSystem.Domain.Entities;
+﻿using HotelBookingSystem.Domain.Entities.Hotels;
+using HotelBookingSystem.Domain.Entities.Payments;
+
+namespace HotelBookingSystem.Domain.Entities.Discounts;
 
 public class Discount
 {

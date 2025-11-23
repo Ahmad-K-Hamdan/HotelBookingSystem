@@ -1,4 +1,4 @@
-﻿namespace HotelBookingSystem.Domain.Entities;
+﻿namespace HotelBookingSystem.Domain.Entities.Hotels;
 
 public class HotelImage
 {
