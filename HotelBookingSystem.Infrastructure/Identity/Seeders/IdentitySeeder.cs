@@ -30,7 +30,7 @@ public static class IdentitySeeder
                 UserName = managerEmail,
                 FirstName = "Hotel",
                 LastName = "Manager",
-                BirthDate = new DateTime(1973, 12, 4),
+                BirthDate = new DateOnly(1973, 12, 4),
                 EmailConfirmed = true
             };
 
