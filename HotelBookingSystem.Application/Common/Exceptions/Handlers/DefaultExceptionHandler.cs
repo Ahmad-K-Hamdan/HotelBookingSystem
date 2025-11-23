@@ -2,7 +2,6 @@
 using HotelBookingSystem.Application.Common.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Net;
 
 namespace HotelBookingSystem.Application.Common.Exceptions.Handlers;
 

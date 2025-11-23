@@ -1,5 +1,4 @@
 ﻿using AutoMapper.Internal;
-using HotelBookingSystem.Application.Common.Exceptions.Handlers;
 using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure.Data;

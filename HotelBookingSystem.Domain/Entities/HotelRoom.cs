@@ -1,0 +1,15 @@
+﻿namespace HotelBookingSystem.Domain.Entities;
+
+public class HotelRoom
+{
+    public Guid Id { get; set; }
+    public Guid HotelRoomTypeId { get; set; }
+    public int RoomNumber { get; set; }
+    public bool IsAvailable { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+
+    public HotelRoomType RoomType { get; set; } = null!;
+    public ICollection<RoomImage> Images { get; set; } = new List<RoomImage>();
+    public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+}
