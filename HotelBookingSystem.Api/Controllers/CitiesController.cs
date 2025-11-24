@@ -1,4 +1,6 @@
 ﻿using HotelBookingSystem.Application.Cities.Commands.CreateCity;
+using HotelBookingSystem.Application.Cities.Commands.DeleteCity;
+using HotelBookingSystem.Application.Cities.Commands.UpdateCity;
 using HotelBookingSystem.Application.Cities.Queries.GetCities;
 using HotelBookingSystem.Application.Cities.Queries.GetCityById;
 using MediatR;
@@ -65,4 +67,46 @@ public class CitiesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCityById(Guid id)
         => Ok(await _mediator.Send(new GetCityByIdQuery(id)));
+
+    /// <summary>
+    /// Updates an existing city entry in the system.
+    /// </summary>
+    /// <param name="id">The ID of the city to update.</param>
+    /// <param name="command">The command containing city updated details.</param>
+    /// <response code="204">City was successfully updated.</response>
+    /// <response code="404">No city was found with the given ID.</response>
+    /// <response code="400">The request was invalid.</response>
+    [HttpPut("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateCity(Guid id, [FromBody] UpdateCityCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("ID in route does not match command ID.");
+        }
+
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Deletes an existing city entry from the system.
+    /// </summary>
+    /// <param name="id">The ID of the city to delete.</param>
+    /// <response code="204">City was successfully deleted.</response>
+    /// <response code="404">No city was found with the given ID.</response>
+    /// <response code="400">The request was invalid.</response>
+    [HttpDelete("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteCity(Guid id)
+    {
+        await _mediator.Send(new DeleteCityCommand(id));
+        return NoContent();
+    }
 }

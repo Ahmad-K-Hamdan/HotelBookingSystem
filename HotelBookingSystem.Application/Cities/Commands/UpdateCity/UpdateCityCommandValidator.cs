@@ -1,11 +1,14 @@
 ﻿using FluentValidation;
 
-namespace HotelBookingSystem.Application.Cities.Commands.CreateCity;
+namespace HotelBookingSystem.Application.Cities.Commands.UpdateCity;
 
-public class CreateCityCommandValidator : AbstractValidator<CreateCityCommand>
+public class UpdateCityCommandValidator : AbstractValidator<UpdateCityCommand>
 {
-    public CreateCityCommandValidator()
+    public UpdateCityCommandValidator()
     {
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("City ID is required.");
+
         RuleFor(x => x.CityName)
             .NotEmpty().WithMessage("City name is required.")
             .Matches("^[A-Za-z ]+$").WithMessage("City name must contain only letters and spaces.")
@@ -21,7 +24,7 @@ public class CreateCityCommandValidator : AbstractValidator<CreateCityCommand>
         RuleFor(x => x.Description)
             .MaximumLength(2000).WithMessage("Description must not exceed 2000 characters.")
             .Matches("^[A-Za-z0-9 !?,._'\"()\\-/]*$")
-            .WithMessage("Description contains illegal characters. Only English letters, numbers, and punctuation are allowed.")
+            .WithMessage("password contains illegal characters. Only English letters, numbers, and punctuation are allowed.")
             .Must(x => x == null || x.Trim() == x)
             .WithMessage("Description cannot start or end with spaces.");
     }
