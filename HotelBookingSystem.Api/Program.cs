@@ -82,6 +82,7 @@ public class Program
         // Exception Handlers Registration
         builder.Services.AddTransient<IExceptionHandler, ValidationExceptionHandler>();
         builder.Services.AddTransient<IExceptionHandler, IdentityExceptionHandler>();
+        builder.Services.AddTransient<IExceptionHandler, DuplicateRecordExceptionHandler>();
         builder.Services.AddTransient<IExceptionHandler, DefaultExceptionHandler>();
 
         var app = builder.Build();

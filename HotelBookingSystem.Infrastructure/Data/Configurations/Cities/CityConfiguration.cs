@@ -20,6 +20,9 @@ public class CityConfiguration : IEntityTypeConfiguration<City>
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.HasIndex(c => new { c.CityName, c.CountryName })
+            .IsUnique();
+
         builder.Property(c => c.Description)
             .HasMaxLength(2000);
 
