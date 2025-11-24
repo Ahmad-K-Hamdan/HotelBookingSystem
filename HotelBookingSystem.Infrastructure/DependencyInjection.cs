@@ -2,6 +2,7 @@
 using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure.Data;
+using HotelBookingSystem.Infrastructure.Data.Repositories;
 using HotelBookingSystem.Infrastructure.Identity.JwtTokens;
 using HotelBookingSystem.Infrastructure.Identity.Mapping;
 using HotelBookingSystem.Infrastructure.Identity.Models;
@@ -55,6 +56,12 @@ public static class DependencyInjection
         {
             cfg.Internal().MethodMappingEnabled = false;
         }, typeof(IdentityMappingProfile).Assembly);
+
+        // Unit of work
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // IGenericRepo 
+        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
         return services;
     }
