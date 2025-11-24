@@ -1,7 +1,7 @@
-﻿using HotelBookingSystem.Application.Authentication.Commands.EmailConfirmation;
-using HotelBookingSystem.Application.Authentication.Commands.Login;
-using HotelBookingSystem.Application.Authentication.Commands.PasswordReset;
-using HotelBookingSystem.Application.Authentication.Commands.Register;
+﻿using HotelBookingSystem.Application.Features.Authentication.Commands.EmailConfirmation;
+using HotelBookingSystem.Application.Features.Authentication.Commands.Login;
+using HotelBookingSystem.Application.Features.Authentication.Commands.PasswordReset;
+using HotelBookingSystem.Application.Features.Authentication.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,8 +1,8 @@
-﻿using HotelBookingSystem.Application.Cities.Commands.CreateCity;
-using HotelBookingSystem.Application.Cities.Commands.DeleteCity;
-using HotelBookingSystem.Application.Cities.Commands.UpdateCity;
-using HotelBookingSystem.Application.Cities.Queries.GetCities;
-using HotelBookingSystem.Application.Cities.Queries.GetCityById;
+﻿using HotelBookingSystem.Application.Features.Cities.Commands.CreateCity;
+using HotelBookingSystem.Application.Features.Cities.Commands.DeleteCity;
+using HotelBookingSystem.Application.Features.Cities.Commands.UpdateCity;
+using HotelBookingSystem.Application.Features.Cities.Queries.GetCities;
+using HotelBookingSystem.Application.Features.Cities.Queries.GetCityById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

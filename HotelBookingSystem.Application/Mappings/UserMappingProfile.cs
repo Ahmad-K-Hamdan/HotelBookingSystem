@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using HotelBookingSystem.Application.Authentication.Commands.Register;
 using HotelBookingSystem.Application.Common.Models;
+using HotelBookingSystem.Application.Features.Authentication.Commands.Register;
 
 namespace HotelBookingSystem.Application.Mappings;
 
