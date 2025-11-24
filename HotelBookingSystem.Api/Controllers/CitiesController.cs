@@ -1,5 +1,6 @@
 ﻿using HotelBookingSystem.Application.Cities.Commands.CreateCity;
 using HotelBookingSystem.Application.Cities.Queries.GetCities;
+using HotelBookingSystem.Application.Cities.Queries.GetCityById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,6 +49,20 @@ public class CitiesController : ControllerBase
     public async Task<IActionResult> CreateCity([FromBody] CreateCityCommand command)
     {
         var id = await _mediator.Send(command);
-        return Created(string.Empty, id);
+        return CreatedAtAction(nameof(GetCityById), new { id }, id);
     }
+
+    /// <summary>
+    /// Retrieves the details of a specific city by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the city to retrieve.</param>
+    /// <returns>The details of the requested city.</returns>
+    /// <response code="200">Successfully returned the city.</response>
+    /// <response code="404">No city was found with the given ID.</response>
+    [HttpGet("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(CityDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCityById(Guid id)
+        => Ok(await _mediator.Send(new GetCityByIdQuery(id)));
 }

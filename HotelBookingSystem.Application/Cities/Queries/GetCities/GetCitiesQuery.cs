@@ -1,4 +1,5 @@
-﻿using HotelBookingSystem.Application.Cities.Queries.GetCities;
-using MediatR;
+﻿using MediatR;
+
+namespace HotelBookingSystem.Application.Cities.Queries.GetCities;
 
 public record GetCitiesQuery() : IRequest<List<CityDto>>;
