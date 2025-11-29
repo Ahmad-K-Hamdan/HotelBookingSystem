@@ -20,10 +20,4 @@
 		<ProjectReference Include="..\HotelBookingSystem.Domain\HotelBookingSystem.Domain.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Features\Guests\Mapping\" />
-	  <Folder Include="Features\Guests\Queries\GetGuestById\" />
-	  <Folder Include="Features\Guests\Queries\GetGuests\" />
-	</ItemGroup>
-
 </Project>
