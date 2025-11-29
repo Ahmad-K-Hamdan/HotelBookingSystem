@@ -1,6 +1,5 @@
 ﻿using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
-using HotelBookingSystem.Application.Features.Cities.Commands.UpdateCity;
 using HotelBookingSystem.Domain.Entities.Guests;
 using MediatR;
 
