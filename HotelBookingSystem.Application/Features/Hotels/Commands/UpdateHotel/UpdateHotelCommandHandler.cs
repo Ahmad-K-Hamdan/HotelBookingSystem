@@ -1,6 +1,5 @@
 ﻿using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
-using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels.Dtos;
 using HotelBookingSystem.Domain.Entities.Cities;
 using HotelBookingSystem.Domain.Entities.Discounts;
 using HotelBookingSystem.Domain.Entities.Hotels;

@@ -1,5 +1,6 @@
 
 using HotelBookingSystem.Api.Middleware;
+using HotelBookingSystem.Api.Services;
 using HotelBookingSystem.Application;
 using HotelBookingSystem.Application.Common.Exceptions.Handlers;
 using HotelBookingSystem.Application.Common.Interfaces;
@@ -10,6 +11,7 @@ using HotelBookingSystem.Infrastructure.Identity.Seeders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text;
 
@@ -48,6 +50,35 @@ public class Program
             {
                 options.IncludeXmlComments(xmlPath);
             }
+
+            // JWT Authentication support in Swagger UI
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer 12345abcdef'",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            // Require JWT for protected endpoints
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        },
+                        Scheme = "oauth2",
+                        Name = "Bearer",
+                        In = ParameterLocation.Header,
+                    },
+                    new List<string>()
+                }
+            });
         });
 
         // JWT Authentication Setup
@@ -56,6 +87,7 @@ public class Program
         var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()
             ?? throw new InvalidOperationException("Missing JwtSettings configuration.");
 
+        // Configure JWT bearer authentication
         builder.Services
             .AddAuthentication(options =>
             {
@@ -79,11 +111,18 @@ public class Program
 
         builder.Services.AddAuthorization();
 
+        // Allow reading HttpContext inside services
+        builder.Services.AddHttpContextAccessor();
+
+        // Register CurrentUserService (reads user ID from JWT)
+        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
         // Exception Handlers Registration
         builder.Services.AddTransient<IExceptionHandler, ValidationExceptionHandler>();
         builder.Services.AddTransient<IExceptionHandler, IdentityExceptionHandler>();
         builder.Services.AddTransient<IExceptionHandler, DuplicateRecordExceptionHandler>();
         builder.Services.AddTransient<IExceptionHandler, NotFoundExceptionHandler>();
+        builder.Services.AddTransient<IExceptionHandler, UnauthorizedAccessExceptionHandler>();
         builder.Services.AddTransient<IExceptionHandler, DefaultExceptionHandler>();
 
         var app = builder.Build();
@@ -107,9 +146,10 @@ public class Program
         // Global Exception Handling Middleware
         app.UseMiddleware<ExceptionMiddleware>();
 
-        // Standard ASP.NET Core Pipeline
+        // HTTPS redirection
         app.UseHttpsRedirection();
 
+        // JWT Authentication + Authorization
         app.UseAuthentication();
         app.UseAuthorization();
 
