@@ -1,4 +1,8 @@
 ﻿using HotelBookingSystem.Application.Features.Hotels.Commands.CreateHotel;
+using HotelBookingSystem.Application.Features.Hotels.Commands.DeleteHotel;
+using HotelBookingSystem.Application.Features.Hotels.Commands.UpdateHotel;
+using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
+using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels.Dtos;
 using MediatR;
@@ -82,7 +86,109 @@ public class HotelsController : ControllerBase
     public async Task<IActionResult> CreateHotel([FromBody] CreateHotelDto createHotelDto)
     {
         var id = await _mediator.Send(new CreateHotelCommand(createHotelDto));
-        return Ok(id);
-        //return CreatedAtAction(nameof(GetHotelById), new { id }, id);
+        return CreatedAtAction(nameof(GetHotelById), new { id }, id);
+    }
+
+    /// <summary>
+    /// Retrieves detailed information about a specific hotel.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint is used for the **Hotel Details Page** on the client application.
+    ///
+    /// The response includes:
+    /// - Hotel info: name, address, city, country, star rating, hotel group, description.
+    /// - List of hotel images.
+    /// - Amenity names.
+    /// - Room types with capacity, pricing (original + discounted), availability per type, and room-type images.
+    /// - Reviews, average rating, and total review count.
+    ///
+    /// **Date range:**
+    /// - `checkInDate` and `checkOutDate` determine room-type availability and pricing.
+    /// - If not provided, defaults are applied: **today → tomorrow**.
+    ///
+    /// **Availability logic:**
+    /// - A room type is marked as available if **any** room under that type is free across the entire date range.
+    /// - Individual room numbers are intentionally not returned.
+    /// </remarks>
+    /// <param name="id">The ID of the hotel to retrieve.</param>
+    /// <param name="checkInDate">Optional check-in date (defaults to today).</param>
+    /// <param name="checkOutDate">Optional check-out date (defaults to tomorrow).</param>
+    /// <returns>Detailed information for the requested hotel.</returns>
+    /// <response code="200">Successfully returned the hotel details.</response>
+    /// <response code="404">No hotel was found with the given ID.</response>
+    /// <response code="400">Invalid request, such as an invalid date range.</response>
+    [HttpGet("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(HotelDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetHotelById(Guid id, [FromQuery] DateOnly? checkInDate, [FromQuery] DateOnly? checkOutDate)
+    {
+        return Ok(await _mediator.Send(new GetHotelByIdQuery(id, checkInDate, checkOutDate)));
+    }
+
+    /// <summary>
+    /// Updates an existing hotel in the system.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint is used by the Admin interface to modify hotel information.
+    ///
+    /// The request body must contain a valid <c>UpdateHotelCommand</c>, which includes:
+    /// - <c>Id</c> — must match the hotel ID in the route.
+    /// - <c>HotelName</c>, <c>HotelAddress</c>, <c>StarRating</c>, <c>Latitude</c>, <c>Longitude</c>, etc.
+    /// - <c>HotelGroupId</c> and <c>CityId</c> must reference existing entities.
+    ///
+    /// **Validation:**
+    /// - If the route ID does not match <c>command.Id</c>, the request is rejected.
+    /// - FluentValidation ensures that all required fields are valid.
+    ///
+    /// On success, no content is returned.
+    /// </remarks>
+    /// <param name="id">The ID of the hotel to update.</param>
+    /// <param name="command">The updated hotel information.</param>
+    /// <response code="204">Hotel was successfully updated.</response>
+    /// <response code="404">No hotel was found with the given ID.</response>
+    /// <response code="400">The request is invalid.</response>
+    [HttpPut("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateHotel(Guid id, [FromBody] UpdateHotelCommand command)
+    {
+        if (id != command.Id)
+        {
+            return BadRequest("ID in route does not match command ID.");
+        }
+
+        await _mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Deletes an existing hotel from the system.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint permanently removes a hotel and all related data constraints must be respected.
+    ///
+    /// **Behavior:**
+    /// - A hotel cannot be deleted if it is referenced by active or historical bookings (unless cascades are configured).
+    /// - If the hotel does not exist, a <c>404 Not Found</c> is returned.
+    ///
+    /// This operation is intended for Admin use only.
+    /// </remarks>
+    /// <param name="id">The ID of the hotel to delete.</param>
+    /// <response code="204">Hotel was successfully deleted.</response>
+    /// <response code="404">No hotel was found with the given ID.</response>
+    /// <response code="400">Invalid request.</response>
+    [HttpDelete("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DeleteHotel(Guid id)
+    {
+        await _mediator.Send(new DeleteHotelCommand(id));
+        return NoContent();
     }
 }

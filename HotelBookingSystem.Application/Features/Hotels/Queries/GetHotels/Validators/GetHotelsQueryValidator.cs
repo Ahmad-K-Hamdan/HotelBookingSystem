@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using HotelBookingSystem.Application.Features.Hotels.GetHotels;
 
 namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels.Validators;
 
@@ -10,7 +9,9 @@ public class GetHotelsQueryValidator : AbstractValidator<GetHotelsQuery>
         RuleFor(x => x.CheckInDate)
             .NotEmpty().WithMessage("Check-in date is required.")
             .LessThan(x => x.CheckOutDate)
-            .WithMessage("Check-in date must be before check-out date.");
+            .WithMessage("Check-in date must be before check-out date.")
+            .GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today))
+            .WithMessage("Check-in date cannot be in the past.");
 
         RuleFor(x => x.CheckOutDate)
             .NotEmpty().WithMessage("Check-out date is required.");
@@ -59,13 +60,6 @@ public class GetHotelsQueryValidator : AbstractValidator<GetHotelsQuery>
         RuleFor(x => x)
             .Must(x => !x.MinPrice.HasValue || !x.MaxPrice.HasValue || x.MinPrice <= x.MaxPrice)
             .WithMessage("Minimum price cannot be greater than maximum price.");
-
-        RuleFor(x => x.HotelGroupName)
-            .MaximumLength(200).WithMessage("Hotel group name must not exceed 200 characters.")
-            .Matches("^[A-Za-z0-9 !?,._'\"()\\-/]*$").When(x => !string.IsNullOrWhiteSpace(x.HotelGroupName))
-            .WithMessage("Hotel group name contains illegal characters. Only English letters, numbers, and punctuation are allowed.")
-            .Must(x => x == null || x.Trim() == x)
-            .WithMessage("Hotel group name cannot start or end with spaces.");
 
         RuleFor(x => x.AmenityIds)
             .Must(list => list == null || list.Distinct().Count() == list.Count)

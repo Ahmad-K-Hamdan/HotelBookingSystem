@@ -1,16 +1,19 @@
 ﻿using FluentValidation;
 
-namespace HotelBookingSystem.Application.Features.Hotels.Commands.CreateHotel;
+namespace HotelBookingSystem.Application.Features.Hotels.Commands.UpdateHotel;
 
-public class CreateHotelCommandValidator : AbstractValidator<CreateHotelCommand>
+public class UpdateHotelCommandValidator : AbstractValidator<UpdateHotelCommand>
 {
-    public CreateHotelCommandValidator()
+    public UpdateHotelCommandValidator()
     {
+        RuleFor(x => x.Id)
+            .NotEmpty().WithMessage("Hotel ID is required.");
+
         RuleFor(x => x.Hotel.HotelGroupId)
-         .NotEmpty().WithMessage("Hotel group ID is required.");
+            .NotEmpty().WithMessage("Hotel group ID is required.");
 
         RuleFor(x => x.Hotel.CityId)
-         .NotEmpty().WithMessage("City ID is required.");
+            .NotEmpty().WithMessage("City ID is required.");
 
         RuleFor(x => x.Hotel.HotelName)
             .NotEmpty().WithMessage("Hotel name is required.")
@@ -39,6 +42,7 @@ public class CreateHotelCommandValidator : AbstractValidator<CreateHotelCommand>
             .InclusiveBetween(-180, 180).WithMessage("Longitude must be between -180 and 180.");
 
         RuleFor(x => x.Hotel.Description)
+            .NotEmpty().WithMessage("Description is required.")
             .Matches("^[A-Za-z0-9 !?,._'\"()\\-/]*$")
             .WithMessage("Description contains illegal characters. Only English letters, numbers, and punctuation are allowed.")
             .MaximumLength(500).WithMessage("Description must not exceed 500 characters.")

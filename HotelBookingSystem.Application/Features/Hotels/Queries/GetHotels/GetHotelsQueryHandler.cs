@@ -72,12 +72,6 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
             hotels = hotels.Where(h => h.HotelGroupId == request.HotelGroupId.Value);
         }
 
-        if (!string.IsNullOrWhiteSpace(request.HotelGroupName))
-        {
-            var groupName = request.HotelGroupName.Trim().ToLower();
-            hotels = hotels.Where(h => h.HotelGroup.GroupName.ToLower().Contains(groupName));
-        }
-
         if (request.AmenityIds is { Count: > 0 })
         {
             foreach (var amenityId in request.AmenityIds.Distinct())
