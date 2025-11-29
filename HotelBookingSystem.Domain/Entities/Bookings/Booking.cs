@@ -11,8 +11,8 @@ public class Booking
     public Guid GuestId { get; set; }
     public Guid HotelId { get; set; }
     public Guid HotelRoomId { get; set; }
-    public DateTime CheckInDateTime { get; set; }
-    public DateTime CheckOutDateTime { get; set; }
+    public DateOnly CheckInDate { get; set; }
+    public DateOnly CheckOutDate { get; set; }
     public int NumOfAdults { get; set; }
     public int NumOfChildren { get; set; }
     public string? SpecialRequests { get; set; }

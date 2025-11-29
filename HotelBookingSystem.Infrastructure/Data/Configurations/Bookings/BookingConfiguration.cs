@@ -12,10 +12,10 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         builder.HasKey(b => b.Id);
 
-        builder.Property(b => b.CheckInDateTime)
+        builder.Property(b => b.CheckInDate)
             .IsRequired();
 
-        builder.Property(b => b.CheckOutDateTime)
+        builder.Property(b => b.CheckOutDate)
             .IsRequired();
 
         builder.Property(b => b.NumOfAdults)
