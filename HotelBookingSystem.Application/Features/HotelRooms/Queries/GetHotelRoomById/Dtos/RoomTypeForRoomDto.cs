@@ -1,4 +1,6 @@
-﻿namespace HotelBookingSystem.Application.Features.HotelRooms.Queries.GetHotelRoomById.Dtos;
+﻿using HotelBookingSystem.Domain.Entities.Rooms;
+
+namespace HotelBookingSystem.Application.Features.HotelRooms.Queries.GetHotelRoomById.Dtos;
 
 public class RoomTypeForRoomDto
 {
@@ -10,4 +12,5 @@ public class RoomTypeForRoomDto
     public int BedsCount { get; set; }
     public int MaxNumOfGuestsAdults { get; set; }
     public int MaxNumOfGuestsChildren { get; set; }
+    public List<RoomTypeImageDto> Images { get; set; } = new();
 }

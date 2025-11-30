@@ -64,8 +64,7 @@ public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, Hotel
                     IsAvailable = hasAvailableRoom,
                     OriginalPricePerNight = originalPrice,
                     DiscountedPricePerNight = discountedPrice,
-                    ImageUrls = rt.Rooms
-                        .SelectMany(r => r.Images)
+                    ImageUrls = rt.Images
                         .Where(img => !string.IsNullOrEmpty(img.Url))
                         .Select(img => img.Url)
                         .Distinct()

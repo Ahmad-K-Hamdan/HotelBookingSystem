@@ -12,6 +12,5 @@ public class HotelRoom
     public DateTime? UpdatedAt { get; set; }
 
     public HotelRoomType RoomType { get; set; } = null!;
-    public ICollection<RoomImage> Images { get; set; } = new List<RoomImage>();
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }

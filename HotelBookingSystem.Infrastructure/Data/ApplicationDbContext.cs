@@ -28,7 +28,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole, string
     public DbSet<HotelRoomType> HotelRoomTypes => Set<HotelRoomType>();
     public DbSet<HotelRoom> HotelRooms => Set<HotelRoom>();
     public DbSet<HotelImage> HotelImages => Set<HotelImage>();
-    public DbSet<RoomImage> RoomImages => Set<RoomImage>();
+    public DbSet<RoomTypeImage> RoomTypeImages => Set<RoomTypeImage>();
     public DbSet<Amenity> Amenities => Set<Amenity>();
     public DbSet<HotelAmenity> HotelAmenities => Set<HotelAmenity>();
     public DbSet<Discount> Discounts => Set<Discount>();

@@ -13,4 +13,5 @@ public class HotelRoomTypeDetailsDto
 
     public HotelForRoomTypeDto Hotel { get; set; } = null!;
     public List<RoomInRoomTypeDto> Rooms { get; set; } = new();
+    public List<RoomTypeImageDto> Images { get; set; } = new();
 }

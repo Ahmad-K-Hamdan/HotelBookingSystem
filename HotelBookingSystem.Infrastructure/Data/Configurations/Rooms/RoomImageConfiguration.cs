@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HotelBookingSystem.Infrastructure.Data.Configurations.Rooms;
 
-public class RoomImageConfiguration : IEntityTypeConfiguration<RoomImage>
+public class RoomTypeImageConfiguration : IEntityTypeConfiguration<RoomTypeImage>
 {
-    public void Configure(EntityTypeBuilder<RoomImage> builder)
+    public void Configure(EntityTypeBuilder<RoomTypeImage> builder)
     {
-        builder.ToTable("RoomImage");
+        builder.ToTable("RoomTypeImage");
 
         builder.HasKey(i => i.Id);
 
@@ -19,11 +19,11 @@ public class RoomImageConfiguration : IEntityTypeConfiguration<RoomImage>
         builder.Property(i => i.IsMain)
             .IsRequired();
 
-        builder.HasIndex(i => i.HotelRoomId);
+        builder.HasIndex(i => i.HotelRoomTypeId);
 
-        builder.HasOne(i => i.HotelRoom)
-            .WithMany(r => r.Images)
-            .HasForeignKey(i => i.HotelRoomId)
+        builder.HasOne(i => i.HotelRoomType)
+            .WithMany(rt => rt.Images)
+            .HasForeignKey(i => i.HotelRoomTypeId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

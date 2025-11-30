@@ -39,6 +39,16 @@ public class GetHotelRoomTypeByIdQueryHandler : IRequestHandler<GetHotelRoomType
             BedsCount = roomType.BedsCount,
             MaxNumOfGuestsAdults = roomType.MaxNumOfGuestsAdults,
             MaxNumOfGuestsChildren = roomType.MaxNumOfGuestsChildren,
+            Images = roomType.Images
+                .OrderByDescending(i => i.IsMain)
+                .ThenBy(i => i.Id)
+                .Select(i => new RoomTypeImageDto
+                {
+                    Id = i.Id,
+                    Url = i.Url,
+                    IsMain = i.IsMain
+                })
+                .ToList(),
             Hotel = new HotelForRoomTypeDto
             {
                 Id = roomType.Hotel.Id,

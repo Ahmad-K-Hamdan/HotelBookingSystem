@@ -21,7 +21,6 @@ public class GetHotelRoomByIdQueryHandler : IRequestHandler<GetHotelRoomByIdQuer
         var room = await _roomRepository.Query()
             .Include(r => r.RoomType)
                 .ThenInclude(rt => rt.Hotel)
-            .Include(r => r.Images)
             .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
 
         if (room is null)
@@ -46,18 +45,18 @@ public class GetHotelRoomByIdQueryHandler : IRequestHandler<GetHotelRoomByIdQuer
                 PricePerNight = room.RoomType.PricePerNight,
                 BedsCount = room.RoomType.BedsCount,
                 MaxNumOfGuestsAdults = room.RoomType.MaxNumOfGuestsAdults,
-                MaxNumOfGuestsChildren = room.RoomType.MaxNumOfGuestsChildren
-            },
-            Images = room.Images
+                MaxNumOfGuestsChildren = room.RoomType.MaxNumOfGuestsChildren,
+                Images = room.RoomType.Images
                 .OrderByDescending(i => i.IsMain)
                 .ThenBy(i => i.Id)
-                .Select(i => new RoomImageDto
+                .Select(i => new RoomTypeImageDto
                 {
                     Id = i.Id,
                     Url = i.Url,
                     IsMain = i.IsMain
                 })
                 .ToList()
+            },
         };
     }
 }

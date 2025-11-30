@@ -1,6 +1,6 @@
 ﻿namespace HotelBookingSystem.Application.Features.HotelRooms.Queries.GetHotelRoomById.Dtos;
 
-public class RoomImageDto
+public class RoomTypeImageDto
 {
     public Guid Id { get; set; }
     public string Url { get; set; } = null!;
