@@ -56,7 +56,6 @@ public class CreateHotelCommandHandler : IRequestHandler<CreateHotelCommand, Gui
 
         await _hotelRepository.AddAsync(hotel);
         await _unitOfWork.SaveChangesAsync();
-
         return hotel.Id;
     }
 }

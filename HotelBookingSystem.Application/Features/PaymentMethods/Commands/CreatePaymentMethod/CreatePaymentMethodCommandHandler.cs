@@ -35,7 +35,6 @@ public class CreatePaymentMethodCommandHandler : IRequestHandler<CreatePaymentMe
 
         await _paymentMethodRepository.AddAsync(paymentMethod);
         await _unitOfWork.SaveChangesAsync();
-
         return paymentMethod.Id;
     }
 }

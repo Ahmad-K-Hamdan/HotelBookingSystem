@@ -39,7 +39,6 @@ public class CreateGuestCommandHandler : IRequestHandler<CreateGuestCommand, Gui
 
         await _guestRepository.AddAsync(guest);
         await _unitOfWork.SaveChangesAsync();
-
         return guest.Id;
     }
 }

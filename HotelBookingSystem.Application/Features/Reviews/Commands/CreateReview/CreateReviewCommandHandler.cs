@@ -46,7 +46,6 @@ public class CreateReviewCommandHandler : IRequestHandler<CreateReviewCommand, G
 
         await _reviewRepository.AddAsync(review);
         await _unitOfWork.SaveChangesAsync();
-
         return review.Id;
     }
 }

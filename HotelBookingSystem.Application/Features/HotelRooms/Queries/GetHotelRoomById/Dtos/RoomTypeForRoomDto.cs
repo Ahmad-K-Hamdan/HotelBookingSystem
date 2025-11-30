@@ -1,4 +1,4 @@
-﻿using HotelBookingSystem.Domain.Entities.Rooms;
+﻿using HotelBookingSystem.Application.Common.Dtos;
 
 namespace HotelBookingSystem.Application.Features.HotelRooms.Queries.GetHotelRoomById.Dtos;
 

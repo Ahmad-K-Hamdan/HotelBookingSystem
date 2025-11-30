@@ -37,7 +37,6 @@ public class CreateHotelGroupCommandHandler : IRequestHandler<CreateHotelGroupCo
 
         await _hotelGroupRepository.AddAsync(hotelGroup);
         await _unitOfWork.SaveChangesAsync();
-
         return hotelGroup.Id;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace HotelBookingSystem.Application.Features.HotelRoomTypes.Queries.GetHotelRoomTypeById.Dtos;
+﻿using HotelBookingSystem.Application.Common.Dtos;
+
+namespace HotelBookingSystem.Application.Features.HotelRoomTypes.Queries.GetHotelRoomTypeById.Dtos;
 
 public class HotelRoomTypeDetailsDto
 {

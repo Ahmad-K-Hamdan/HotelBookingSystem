@@ -1,4 +1,5 @@
-﻿using HotelBookingSystem.Application.Common.Exceptions;
+﻿using HotelBookingSystem.Application.Common.Dtos;
+using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Features.HotelRooms.Queries.GetHotelRoomById.Dtos;
 using HotelBookingSystem.Domain.Entities.Rooms;
@@ -21,12 +22,16 @@ public class GetHotelRoomByIdQueryHandler : IRequestHandler<GetHotelRoomByIdQuer
         var room = await _roomRepository.Query()
             .Include(r => r.RoomType)
                 .ThenInclude(rt => rt.Hotel)
+            .Include(r => r.RoomType)
+                .ThenInclude(rt => rt.Images)
             .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken);
 
         if (room is null)
         {
             throw new NotFoundException(nameof(HotelRoom), request.Id);
         }
+
+        var roomType = room.RoomType;
 
         return new HotelRoomDetailsDto
         {
@@ -38,24 +43,24 @@ public class GetHotelRoomByIdQueryHandler : IRequestHandler<GetHotelRoomByIdQuer
             UpdatedAt = room.UpdatedAt,
             RoomType = new RoomTypeForRoomDto
             {
-                Id = room.RoomType.Id,
-                HotelId = room.RoomType.HotelId,
-                RoomTypeName = room.RoomType.Name,
-                Description = room.RoomType.Description,
-                PricePerNight = room.RoomType.PricePerNight,
-                BedsCount = room.RoomType.BedsCount,
-                MaxNumOfGuestsAdults = room.RoomType.MaxNumOfGuestsAdults,
-                MaxNumOfGuestsChildren = room.RoomType.MaxNumOfGuestsChildren,
-                Images = room.RoomType.Images
-                .OrderByDescending(i => i.IsMain)
-                .ThenBy(i => i.Id)
-                .Select(i => new RoomTypeImageDto
-                {
-                    Id = i.Id,
-                    Url = i.Url,
-                    IsMain = i.IsMain
-                })
-                .ToList()
+                Id = roomType.Id,
+                HotelId = roomType.HotelId,
+                RoomTypeName = roomType.Name,
+                Description = roomType.Description,
+                PricePerNight = roomType.PricePerNight,
+                BedsCount = roomType.BedsCount,
+                MaxNumOfGuestsAdults = roomType.MaxNumOfGuestsAdults,
+                MaxNumOfGuestsChildren = roomType.MaxNumOfGuestsChildren,
+                Images = roomType.Images
+                    .OrderByDescending(i => i.IsMain)
+                    .ThenBy(i => i.Id)
+                    .Select(i => new RoomTypeImageDto
+                    {
+                        Id = i.Id,
+                        Url = i.Url,
+                        IsMain = i.IsMain
+                    })
+                    .ToList()
             },
         };
     }

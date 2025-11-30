@@ -36,7 +36,6 @@ public class CreateAmenityCommandHandler : IRequestHandler<CreateAmenityCommand,
 
         await _amenityRepository.AddAsync(amenity);
         await _unitOfWork.SaveChangesAsync();
-
         return amenity.Id;
     }
 }

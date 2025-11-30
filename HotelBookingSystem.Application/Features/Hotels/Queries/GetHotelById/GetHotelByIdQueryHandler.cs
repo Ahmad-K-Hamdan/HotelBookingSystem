@@ -29,6 +29,8 @@ public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, Hotel
             .Include(h => h.RoomTypes)
                 .ThenInclude(rt => rt.Rooms)
                     .ThenInclude(r => r.Bookings)
+            .Include(h => h.RoomTypes)
+                .ThenInclude(rt => rt.Images)
             .Include(h => h.Reviews);
 
         var hotel = await hotelQuery.FirstOrDefaultAsync(h => h.Id == request.Id, cancellationToken);

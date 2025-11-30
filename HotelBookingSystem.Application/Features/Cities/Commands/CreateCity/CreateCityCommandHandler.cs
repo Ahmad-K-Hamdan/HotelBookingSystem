@@ -39,7 +39,6 @@ public class CreateCityCommandHandler : IRequestHandler<CreateCityCommand, Guid>
 
         await _cityRepository.AddAsync(city);
         await _unitOfWork.SaveChangesAsync();
-
         return city.Id;
     }
 }

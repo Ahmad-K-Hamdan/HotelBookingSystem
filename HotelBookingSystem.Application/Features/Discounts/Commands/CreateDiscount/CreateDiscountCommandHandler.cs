@@ -38,7 +38,6 @@ public class CreateDiscountCommandHandler : IRequestHandler<CreateDiscountComman
 
         await _discountRepository.AddAsync(discount);
         await _unitOfWork.SaveChangesAsync();
-
         return discount.Id;
     }
 }

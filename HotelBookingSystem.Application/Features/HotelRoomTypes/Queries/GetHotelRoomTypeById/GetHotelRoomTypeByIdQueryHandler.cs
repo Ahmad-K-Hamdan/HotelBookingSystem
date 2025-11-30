@@ -1,4 +1,5 @@
-﻿using HotelBookingSystem.Application.Common.Exceptions;
+﻿using HotelBookingSystem.Application.Common.Dtos;
+using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Features.HotelRoomTypes.Queries.GetHotelRoomTypeById.Dtos;
 using HotelBookingSystem.Domain.Entities.Rooms;
@@ -22,6 +23,7 @@ public class GetHotelRoomTypeByIdQueryHandler : IRequestHandler<GetHotelRoomType
             .Include(rt => rt.Hotel)
                 .ThenInclude(h => h.City)
             .Include(rt => rt.Rooms)
+            .Include(rt => rt.Images)
             .FirstOrDefaultAsync(rt => rt.Id == request.Id, cancellationToken);
 
         if (roomType is null)
