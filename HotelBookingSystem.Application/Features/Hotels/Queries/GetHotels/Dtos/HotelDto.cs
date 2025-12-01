@@ -10,8 +10,8 @@ public class HotelDto
     public string CountryName { get; set; } = null!;
     public int StarRating { get; set; }
     public bool HasActiveDiscount { get; set; }
-    public decimal? MinOriginalPricePerNight { get; set; }
-    public decimal? MinDiscountedPricePerNight { get; set; }
+    public decimal? MinTotalOriginalPricePerNight { get; set; }
+    public decimal? MinTotalDiscountedPricePerNight { get; set; }
     public int VisitCount { get; set; }
     public string? MainImageUrl { get; set; }
     public List<string> AmenityNames { get; set; } = new();

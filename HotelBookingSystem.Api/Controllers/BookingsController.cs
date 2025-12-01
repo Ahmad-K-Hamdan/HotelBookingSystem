@@ -1,6 +1,6 @@
 ﻿using HotelBookingSystem.Application.Features.Bookings.Commands.CreateBooking;
-using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingById;
-using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingById.Dtos;
+using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingDetailsById;
+using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingDetailsById.Dtos;
 using HotelBookingSystem.Application.Features.Bookings.Queries.GetMyBookings;
 using HotelBookingSystem.Application.Features.Payments.Commands.CreatePaymentForBooking;
 using HotelBookingSystem.Application.Features.Payments.Queries.GetPaymentsForBooking;
@@ -71,7 +71,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> CreateBooking([FromBody] CreateBookingCommand command)
     {
         var id = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetBookingById), new { id }, id);
+        return CreatedAtAction(nameof(GetBookingDetailsById), new { id }, id);
     }
 
     /// <summary>
@@ -106,13 +106,13 @@ public class BookingsController : ControllerBase
     /// <response code="200">Successfully returned the booking details.</response>
     /// <response code="404">No booking was found with the given ID.</response>
     /// <response code="401">User is not authenticated or does not own this booking.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}/details")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(BookingDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<IActionResult> GetBookingById(Guid id)
-        => Ok(await _mediator.Send(new GetBookingByIdQuery(id)));
+    public async Task<IActionResult> GetBookingDetailsById(Guid id)
+        => Ok(await _mediator.Send(new GetBookingDetailsByIdQuery(id)));
 
     /// <summary>
     /// Retrieves all bookings for the current guest.

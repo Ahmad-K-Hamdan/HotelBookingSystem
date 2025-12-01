@@ -7,7 +7,7 @@ public class UpdateDiscountCommandValidator : AbstractValidator<UpdateDiscountCo
     public UpdateDiscountCommandValidator()
     {
         RuleFor(x => x.Id)
-            .NotEmpty().WithMessage("Amenity ID is required.");
+            .NotEmpty().WithMessage("Discount ID is required.");
 
         RuleFor(x => x.DiscountDescription)
             .NotEmpty().WithMessage("Discount description is required.")

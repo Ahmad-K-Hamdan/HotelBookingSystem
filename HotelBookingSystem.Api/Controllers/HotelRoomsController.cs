@@ -35,8 +35,7 @@ public class HotelRoomsController : ControllerBase
     /// all rooms across all hotels and room types.
     ///
     /// **Returned <c>HotelRoomListDto</c> includes:**
-    /// - Room info: <c>Id</c>, <c>HotelRoomTypeId</c>, <c>RoomNumber</c>, <c>IsAvailable</c>,
-    ///   <c>CreatedAt</c>, <c>UpdatedAt</c>.
+    /// - Room info: <c>Id</c>, <c>HotelRoomTypeId</c>, <c>RoomNumber</c>, <c>IsAvailable</c>.
     /// - Room type and hotel info: <c>HotelId</c>, <c>HotelName</c>, <c>RoomTypeName</c>.
     /// </remarks>
     /// <response code="200">Successfully returned the list of rooms.</response>
@@ -65,8 +64,6 @@ public class HotelRoomsController : ControllerBase
     ///     <c>MaxNumOfGuestsAdults</c>, <c>MaxNumOfGuestsChildren</c>.
     /// - <c>Images</c> – all images for this room:
     ///   - <c>Id</c>, <c>Url</c>, <c>IsMain</c>.
-    ///
-    /// Note: Bookings for the room are intentionally **not** returned in this DTO.
     /// </remarks>
     /// <param name="id">The ID of the room to retrieve.</param>
     /// <response code="200">Successfully returned the room details.</response>
@@ -89,8 +86,6 @@ public class HotelRoomsController : ControllerBase
     /// - <c>HotelRoomTypeId</c> – the room type this room belongs to (must exist).
     /// - <c>RoomNumber</c> – numeric room identifier (e.g. 101).
     /// - <c>IsAvailable</c> – initial availability flag.
-    ///
-    /// On success, returns the <c>Guid</c> of the created room.
     /// </remarks>
     /// <param name="command">The command containing room creation details.</param>
     /// <response code="200">Room was successfully created and the new ID was returned.</response>
@@ -102,8 +97,7 @@ public class HotelRoomsController : ControllerBase
     public async Task<IActionResult> CreateHotelRoom([FromBody] CreateHotelRoomCommand command)
     {
         var id = await _mediator.Send(command);
-        return Ok(id);
-        // return CreatedAtAction(nameof(GetHotelRoomById), new { id }, id);
+        return CreatedAtAction(nameof(GetHotelRoomById), new { id }, id);
     }
 
     /// <summary>
@@ -146,9 +140,6 @@ public class HotelRoomsController : ControllerBase
     /// Deletes an existing room.
     /// </summary>
     /// <remarks>
-    /// This operation permanently removes the room. Depending on business rules
-    /// you might later decide to soft-delete instead.
-    ///
     /// **Route parameter:**
     /// - <c>id</c> – the ID of the room to delete.
     /// </remarks>

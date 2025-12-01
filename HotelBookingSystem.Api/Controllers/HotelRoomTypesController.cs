@@ -90,8 +90,6 @@ public class HotelRoomTypesController : ControllerBase
     /// - <c>PricePerNight</c> – base price per night.
     /// - <c>BedsCount</c> – number of beds.
     /// - <c>MaxNumOfGuestsAdults</c>, <c>MaxNumOfGuestsChildren</c>.
-    ///
-    /// On success, returns the <c>Guid</c> of the created room type.
     /// </remarks>
     /// <param name="command">The command containing room type creation details.</param>
     /// <response code="200">Room type was successfully created and the new ID was returned.</response>
@@ -149,9 +147,6 @@ public class HotelRoomTypesController : ControllerBase
     /// Deletes an existing room type.
     /// </summary>
     /// <remarks>
-    /// This operation permanently removes the room type. Depending on business rules,
-    /// you might later decide to soft-delete instead.
-    ///
     /// **Route parameter:**
     /// - <c>id</c> – the ID of the room type to delete.
     /// </remarks>

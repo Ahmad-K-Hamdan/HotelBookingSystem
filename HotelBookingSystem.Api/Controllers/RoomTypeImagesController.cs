@@ -79,8 +79,6 @@ public class RoomTypeImagesController : ControllerBase
     /// - <c>HotelRoomTypeId</c> – the parent room type.
     /// - <c>Url</c> – image URL.
     /// - <c>IsMain</c> – whether this is the main image for that room type.
-    ///
-    /// On success, returns the <c>Guid</c> of the new image.
     /// </remarks>
     /// <param name="command">The command containing room-type image data.</param>
     /// <response code="200">Room-type image was successfully created and the new ID was returned.</response>

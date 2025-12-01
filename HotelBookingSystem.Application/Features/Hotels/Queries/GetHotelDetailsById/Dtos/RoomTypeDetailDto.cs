@@ -1,4 +1,4 @@
-﻿namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
+﻿namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById.Dtos;
 
 public class RoomTypeDetailDto
 {

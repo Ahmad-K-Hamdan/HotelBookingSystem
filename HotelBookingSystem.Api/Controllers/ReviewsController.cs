@@ -84,8 +84,6 @@ public class ReviewsController : ControllerBase
     /// - <c>GuestId</c> – the guest who is submitting the review (must exist).
     /// - <c>Rating</c> – an integer between 1 and 5.
     /// - <c>Comment</c> – optional text (up to 1000 characters).
-    ///
-    /// On success, the endpoint returns the <c>Guid</c> ID of the newly created review.
     /// </remarks>
     /// <param name="command">The command containing review creation details.</param>
     /// <response code="200">Review was successfully created and the new ID was returned.</response>
@@ -141,8 +139,6 @@ public class ReviewsController : ControllerBase
     /// Deletes an existing review from the system.
     /// </summary>
     /// <remarks>
-    /// This operation permanently removes the review.
-    /// 
     /// **Route parameter:**
     /// - <c>id</c> – the ID of the review to delete.
     /// </remarks>

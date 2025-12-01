@@ -1,8 +1,8 @@
 ﻿using HotelBookingSystem.Application.Features.Amenities.Commands.CreateAmenity;
 using HotelBookingSystem.Application.Features.Amenities.Commands.DeleteAmenity;
 using HotelBookingSystem.Application.Features.Amenities.Commands.UpdateAmenity;
-using HotelBookingSystem.Application.Features.Amenities.Queries.GetAmenities;
 using HotelBookingSystem.Application.Features.Amenities.Queries.GetAmenityById;
+using HotelBookingSystem.Application.Features.Amenities.Queries.GetAmenities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +29,15 @@ public class AmenitiesController : ControllerBase
     /// <summary>
     /// Retrieves a list of all amenities available in the system.
     /// </summary>
+    /// <remarks>
+    /// This endpoint is used to populate filters or chips in the UI where users can
+    /// select required amenities (e.g., Wi-Fi, Parking, Pool).
+    ///
+    /// **Returned `AmenityDto` includes:**
+    /// - `Id` – amenity identifier.
+    /// - `Name` – display name
+    /// - `Description` – optional longer text explaining the amenity.
+    /// </remarks>
     /// <returns>A list of amenity DTOs.</returns>
     /// <response code="200">Successfully returned the list of amenities.</response>
     [HttpGet]
@@ -40,6 +49,13 @@ public class AmenitiesController : ControllerBase
     /// <summary>
     /// Creates a new amenity entry in the system.
     /// </summary>
+    /// <remarks>
+    /// Used by Admin to register a new amenity that can be attached to hotels.
+    ///
+    /// **Fields in <c>CreateAmenityCommand</c>:**
+    /// - `Name` – required, letters and spaces only, max length enforced.
+    /// - `Description` – optional, with length and character restrictions.
+    /// </remarks>
     /// <param name="command">The command containing amenity creation details.</param>
     /// <returns>The ID of the newly created amenity.</returns>
     /// <response code="201">Amenity was successfully created.</response>
@@ -57,9 +73,16 @@ public class AmenitiesController : ControllerBase
     /// <summary>
     /// Retrieves the details of a specific amenity by its ID.
     /// </summary>
+    /// <remarks>
+    /// Returns the full amenity details, typically for admin edit forms.
+    ///
+    /// **Returned `AmenityDetailsDto` includes:**
+    /// - `Id`, `Name`, `Description`.
+    /// - `CreatedAt`, `UpdatedAt` timestamps.
+    /// </remarks>
     /// <param name="id">The ID of the amenity to retrieve.</param>
-    /// <returns>The details of the requested amenity.</returns>
-    /// <response code="200">Successfully returned the amenity.</response>
+    /// <returns>Detailed information for the requested amenity.</returns>
+    /// <response code="200">Successfully returned the amenity details.</response>
     /// <response code="404">No amenity was found with the given ID.</response>
     [HttpGet("{id:guid}")]
     [Produces("application/json")]
@@ -71,8 +94,15 @@ public class AmenitiesController : ControllerBase
     /// <summary>
     /// Updates an existing amenity entry in the system.
     /// </summary>
+    /// <remarks>
+    /// Admins use this to modify the name or description of an amenity.
+    ///
+    /// The request body must contain a valid <c>UpdateAmenityCommand</c>, which includes:
+    /// - <c>Id</c> – must match the ID in the route.
+    /// - <c>Name</c>, <c>Description</c>.
+    /// </remarks>
     /// <param name="id">The ID of the amenity to update.</param>
-    /// <param name="command">The command containing amenity updated details.</param>
+    /// <param name="command">The updated amenity data.</param>
     /// <response code="204">Amenity was successfully updated.</response>
     /// <response code="404">No amenity was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
@@ -95,6 +125,9 @@ public class AmenitiesController : ControllerBase
     /// <summary>
     /// Deletes an existing amenity entry from the system.
     /// </summary>
+    /// <remarks>
+    /// Intended for Admin use only.
+    /// </remarks>
     /// <param name="id">The ID of the amenity to delete.</param>
     /// <response code="204">Amenity was successfully deleted.</response>
     /// <response code="404">No amenity was found with the given ID.</response>

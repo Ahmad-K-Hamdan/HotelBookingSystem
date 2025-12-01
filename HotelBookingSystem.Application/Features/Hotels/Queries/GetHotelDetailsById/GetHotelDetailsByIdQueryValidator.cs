@@ -1,10 +1,10 @@
 ﻿using FluentValidation;
 
-namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
+namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById;
 
-public class GetHotelByIdQueryValidator : AbstractValidator<GetHotelByIdQuery>
+public class GetHotelDetailsByIdQueryValidator : AbstractValidator<GetHotelDetailsByIdQuery>
 {
-    public GetHotelByIdQueryValidator()
+    public GetHotelDetailsByIdQueryValidator()
     {
         RuleFor(x => x.CheckInDate)
             .NotEmpty().WithMessage("Check-in date is required.")

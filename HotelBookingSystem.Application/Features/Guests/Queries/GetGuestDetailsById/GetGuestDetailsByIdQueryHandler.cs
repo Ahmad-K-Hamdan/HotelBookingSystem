@@ -1,22 +1,22 @@
 ﻿using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
-using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestById.Dtos;
+using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestDetailsById.Dtos;
 using HotelBookingSystem.Domain.Entities.Guests;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelBookingSystem.Application.Features.Guests.Queries.GetGuestById;
+namespace HotelBookingSystem.Application.Features.Guests.Queries.GetGuestDetailsById;
 
-public class GetGuestByIdQueryHandler : IRequestHandler<GetGuestByIdQuery, GuestDetailsDto>
+public class GetGuestDetailsByIdQueryHandler : IRequestHandler<GetGuestDetailsByIdQuery, GuestDetailsDto>
 {
     private readonly IGenericRepository<Guest> _guestRepository;
 
-    public GetGuestByIdQueryHandler(IGenericRepository<Guest> guestRepository)
+    public GetGuestDetailsByIdQueryHandler(IGenericRepository<Guest> guestRepository)
     {
         _guestRepository = guestRepository;
     }
 
-    public async Task<GuestDetailsDto> Handle(GetGuestByIdQuery request, CancellationToken cancellationToken)
+    public async Task<GuestDetailsDto> Handle(GetGuestDetailsByIdQuery request, CancellationToken cancellationToken)
     {
         var guest = await _guestRepository.Query()
             .Include(g => g.Bookings)

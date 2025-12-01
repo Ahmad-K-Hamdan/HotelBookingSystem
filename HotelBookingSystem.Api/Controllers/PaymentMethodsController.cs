@@ -1,8 +1,8 @@
 ﻿using HotelBookingSystem.Application.Features.PaymentMethods.Commands.CreatePaymentMethod;
 using HotelBookingSystem.Application.Features.PaymentMethods.Commands.DeletePaymentMethod;
 using HotelBookingSystem.Application.Features.PaymentMethods.Commands.UpdatePaymentMethod;
-using HotelBookingSystem.Application.Features.PaymentMethods.Queries.GetPaymentMethods;
 using HotelBookingSystem.Application.Features.PaymentMethods.Queries.GetPaymentMethodById;
+using HotelBookingSystem.Application.Features.PaymentMethods.Queries.GetPaymentMethods;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,9 +27,19 @@ public class PaymentMethodsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves a list of all payment methods available in the system.
+    /// Retrieves all payment methods supported by the system.
     /// </summary>
-    /// <returns>A list of payment method DTOs.</returns>
+    /// <remarks>
+    /// This endpoint is used when building payment options during checkout or in
+    /// admin configuration screens.
+    ///
+    /// A typical payment method might be "Credit Card", "Cash at Reception", etc.
+    ///
+    /// **Returned `PaymentMethodDto` (shape inferred):**
+    /// - `Id` – payment method identifier.
+    /// - `Name` (or similar) – display label shown to the user.
+    /// </remarks>
+    /// <returns>A list of payment methods.</returns>
     /// <response code="200">Successfully returned the list of payment methods.</response>
     [HttpGet]
     [Produces("application/json")]
@@ -38,11 +48,34 @@ public class PaymentMethodsController : ControllerBase
         => Ok(await _mediator.Send(new GetPaymentMethodsQuery()));
 
     /// <summary>
-    /// Creates a new payment method entry in the system.
+    /// Retrieves the details of a specific payment method by its ID.
     /// </summary>
+    /// <remarks>
+    /// Typically used by admin tools to edit or review a specific payment method.
+    /// </remarks>
+    /// <param name="id">The ID of the payment method to retrieve.</param>
+    /// <returns>Detailed information for the requested payment method.</returns>
+    /// <response code="200">Successfully returned the payment method details.</response>
+    /// <response code="404">No payment method was found with the given ID.</response>
+    [HttpGet("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(PaymentMethodDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetPaymentMethodById(Guid id)
+        => Ok(await _mediator.Send(new GetPaymentMethodByIdQuery(id)));
+
+    /// <summary>
+    /// Creates a new payment method in the system.
+    /// </summary>
+    /// <remarks>
+    /// Used by Admin to register a new way of paying.
+    ///
+    /// **Fields in <c>CreatePaymentMethodCommand</c>:**
+    /// - `Name` – required, unique, used as a user-facing label.
+    /// </remarks>
     /// <param name="command">The command containing payment method creation details.</param>
     /// <returns>The ID of the newly created payment method.</returns>
-    /// <response code="201">PaymentMethod was successfully created.</response>
+    /// <response code="201">Payment method was successfully created.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
     [Produces("application/json")]
@@ -55,25 +88,18 @@ public class PaymentMethodsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves the details of a specific payment method by its ID.
+    /// Updates an existing payment method.
     /// </summary>
-    /// <param name="id">The ID of the payment method to retrieve.</param>
-    /// <returns>The details of the requested payment method.</returns>
-    /// <response code="200">Successfully returned the payment method.</response>
-    /// <response code="404">No payment method was found with the given ID.</response>
-    [HttpGet("{id:guid}")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(PaymentMethodDetailsDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetPaymentMethodById(Guid id)
-        => Ok(await _mediator.Send(new GetPaymentMethodByIdQuery(id)));
-
-    /// <summary>
-    /// Updates an existing payment method entry in the system.
-    /// </summary>
+    /// <remarks>
+    /// Admins use this to rename or adjust properties of a payment method.
+    ///
+    /// The request body must contain a valid <c>UpdatePaymentMethodCommand</c>, which includes:
+    /// - <c>Id</c> – must match the ID in the route.
+    /// - Other editable properties of the payment method.
+    /// </remarks>
     /// <param name="id">The ID of the payment method to update.</param>
-    /// <param name="command">The command containing payment method updated details.</param>
-    /// <response code="204">PaymentMethod was successfully updated.</response>
+    /// <param name="command">The updated payment method data.</param>
+    /// <response code="204">Payment method was successfully updated.</response>
     /// <response code="404">No payment method was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
@@ -93,10 +119,13 @@ public class PaymentMethodsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing payment method entry from the system.
+    /// Deletes a payment method from the system.
     /// </summary>
+    /// <remarks>
+    /// Intended for Admin use. 
+    /// </remarks>
     /// <param name="id">The ID of the payment method to delete.</param>
-    /// <response code="204">PaymentMethod was successfully deleted.</response>
+    /// <response code="204">Payment method was successfully deleted.</response>
     /// <response code="404">No payment method was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]

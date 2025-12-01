@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
-using HotelBookingSystem.Application.Features.HotelGroups.Commands.UpdateHotelGroup;
 
-namespace HotelBookingSystem.Application.Features.Discounts.Commands.UpdateDiscount;
+namespace HotelBookingSystem.Application.Features.HotelGroups.Commands.UpdateHotelGroup;
 
 public class UpdateHotelGroupCommandValidator : AbstractValidator<UpdateHotelGroupCommand>
 {

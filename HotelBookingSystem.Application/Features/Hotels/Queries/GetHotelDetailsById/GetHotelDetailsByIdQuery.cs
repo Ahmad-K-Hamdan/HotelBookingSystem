@@ -1,11 +1,11 @@
-﻿using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
+﻿using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById.Dtos;
 using MediatR;
 
-namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
+namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById;
 
-public class GetHotelByIdQuery : IRequest<HotelDetailsDto>
+public class GetHotelDetailsByIdQuery : IRequest<HotelDetailsDto>
 {
-    public GetHotelByIdQuery(Guid id, DateOnly? checkIn, DateOnly? checkOut)
+    public GetHotelDetailsByIdQuery(Guid id, DateOnly? checkIn, DateOnly? checkOut)
     {
         Id = id;
         CheckInDate = checkIn ?? DateOnly.FromDateTime(DateTime.Today);

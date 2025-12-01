@@ -1,8 +1,8 @@
-﻿using HotelBookingSystem.Application.Features.Hotels.Commands.CreateHotel;
+﻿using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById;
+using HotelBookingSystem.Application.Features.Hotels.Commands.CreateHotel;
 using HotelBookingSystem.Application.Features.Hotels.Commands.DeleteHotel;
 using HotelBookingSystem.Application.Features.Hotels.Commands.UpdateHotel;
-using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
-using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
+using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById.Dtos;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels.Dtos;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetRecentlyVisited;
@@ -34,26 +34,38 @@ public class HotelsController : ControllerBase
     /// Retrieves hotels using advanced filtering and room-matching logic.
     /// </summary>
     /// <remarks>
-    /// This endpoint is intended for the main search on the Home / Search Results page.
+    /// This endpoint is intended for the main Search Results page.
+    ///
+    /// It determines whether each hotel can fully accommodate the user’s request
+    /// (dates + number of rooms + adults/children), and for every eligible hotel:
+    ///
+    /// **It returns only the *best matching* combination of rooms** — the cheapest valid
+    /// set of rooms that satisfies the user’s request.
+    ///
+    /// This combination is exposed in `MatchedRooms`, and the pricing fields:
+    /// - `MinTotalOriginalPricePerNight`  
+    /// - `MinTotalDiscountedPricePerNight`  
+    /// represent the **total nightly cost for the entire matched combination.**
+    ///
+    /// ---
     ///
     /// **Important query parameters:**
-    /// - `CheckInDate`, `CheckOutDate` – required; default to today/tomorrow if not provided.
-    /// - `Rooms` – one or more room requests (adults/children per room).
-    /// - `CityName`, `CountryName` – optional location filters.
-    /// - `MinStars` – minimum star rating (1–5).
-    /// - `MinPrice`, `MaxPrice` – price range (based on discounted per-night cost).
-    /// - `OnlyWithActiveDiscount` – return only hotels with active discounts.
-    /// - `AmenityIds`, `RoomTypes` – filter by amenities or specific room type names.
-    /// - `Sort` – options: `price`, `price desc`, `stars`, `stars desc`, `most visited`.
-    /// - `Limit` – optional maximum number of hotels to return (e.g., top 5).
+    /// - `CheckInDate`, `CheckOutDate` – required; default today/tomorrow.
+    /// - `Rooms` – one or more room requests (adults/children).
+    /// - `CityName`, `CountryName` – location filters.
+    /// - `MinStars` – minimum star rating.
+    /// - `MinPrice`, `MaxPrice` – filter by discounted total nightly cost.
+    /// - `OnlyWithActiveDiscount` – active discount only.
+    /// - `AmenityIds`, `RoomTypes` – amenity or room-type filters.
+    /// - `Sort` – price, stars, popularity, etc.
+    /// - `Limit` – limit number of hotels returned.
     ///
     /// **Returned `HotelDto` includes:**
-    /// - Hotel info: name, address, city, country, star rating, and hotel group.
-    /// - `HasActiveDiscount` and `VisitCount`.
-    /// - Effective pricing based on matched rooms: `MinOriginalPricePerNight` and `MinDiscountedPricePerNight`.
-    /// - `MainImageUrl` and a list of amenity names.
-    /// - A list of `MatchedRoomDto` – the actual rooms chosen for the user’s occupancy request,
-    ///   with per-room original and discounted prices.
+    /// - Main hotel data (name, city, star rating, group).
+    /// - Active discount indicator and visit count.
+    /// - Pricing for the matched room combination.
+    /// - `MatchedRooms`: the rooms chosen as the best match.
+    /// - Main hotel image and amenity names.
     /// </remarks>
     [HttpGet]
     [Produces("application/json")]
@@ -73,9 +85,6 @@ public class HotelsController : ControllerBase
     /// - `CityId` — the ID of the city where the hotel is located.
     /// - `HotelName` and `HotelAddress` — the hotel's identity and physical location.
     /// - `StarRating`, `Latitude`, `Longitude`, and `Description` — essential rating and geo information.
-    ///
-    /// Validation is handled using FluentValidation.  
-    /// On success, the API returns the **GUID** identifier of the newly created hotel.
     /// </remarks>
     /// <param name="createHotelDto">The data required to create a new hotel.</param>
     /// <returns>The ID of the newly created hotel.</returns>
@@ -88,29 +97,36 @@ public class HotelsController : ControllerBase
     public async Task<IActionResult> CreateHotel([FromBody] CreateHotelDto createHotelDto)
     {
         var id = await _mediator.Send(new CreateHotelCommand(createHotelDto));
-        return CreatedAtAction(nameof(GetHotelById), new { id }, id);
+        return CreatedAtAction(nameof(GetHotelDetailsById), new { id }, id);
     }
 
     /// <summary>
     /// Retrieves detailed information about a specific hotel.
     /// </summary>
     /// <remarks>
-    /// This endpoint is used for the **Hotel Details Page** on the client application.
+    /// This endpoint is intended for the **Hotel Details Page**.
     ///
-    /// The response includes:
-    /// - Hotel info: name, address, city, country, star rating, hotel group, description.
-    /// - List of hotel images.
+    /// Unlike the search endpoint, which returns only the *best matching* room combination,
+    /// this endpoint returns **all room types** that are available for the specified date range.
+    ///
+    /// The result includes:
+    /// - Full hotel info (name, address, rating, group, description).
+    /// - All hotel images.
     /// - Amenity names.
-    /// - Room types with capacity, pricing (original + discounted), availability per type, and room-type images.
-    /// - Reviews, average rating, and total review count.
+    /// - **All available room types** with:
+    ///     - Capacity
+    ///     - Original + discounted pricing
+    ///     - Availability based on the date range
+    ///     - Room-type images
+    /// - Reviews, average rating, and review count.
     ///
     /// **Date range:**
-    /// - `checkInDate` and `checkOutDate` determine room-type availability and pricing.
-    /// - If not provided, defaults are applied: **today → tomorrow**.
+    /// - `checkInDate` / `checkOutDate` control room-type availability.
+    /// - Defaults: today → tomorrow.
     ///
     /// **Availability logic:**
-    /// - A room type is marked as available if **any** room under that type is free across the entire date range.
-    /// - Individual room numbers are intentionally not returned.
+    /// - A room type is considered available if **any room** in that type is free across the date range.
+    /// - Individual room numbers are not returned here.
     /// </remarks>
     /// <param name="id">The ID of the hotel to retrieve.</param>
     /// <param name="checkInDate">Optional check-in date (defaults to today).</param>
@@ -119,14 +135,14 @@ public class HotelsController : ControllerBase
     /// <response code="200">Successfully returned the hotel details.</response>
     /// <response code="404">No hotel was found with the given ID.</response>
     /// <response code="400">Invalid request, such as an invalid date range.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}/details")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(HotelDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetHotelById(Guid id, [FromQuery] DateOnly? checkInDate, [FromQuery] DateOnly? checkOutDate)
+    public async Task<IActionResult> GetHotelDetailsById(Guid id, [FromQuery] DateOnly? checkInDate, [FromQuery] DateOnly? checkOutDate)
     {
-        return Ok(await _mediator.Send(new GetHotelByIdQuery(id, checkInDate, checkOutDate)));
+        return Ok(await _mediator.Send(new GetHotelDetailsByIdQuery(id, checkInDate, checkOutDate)));
     }
 
     /// <summary>
@@ -139,12 +155,6 @@ public class HotelsController : ControllerBase
     /// - <c>Id</c> — must match the hotel ID in the route.
     /// - <c>HotelName</c>, <c>HotelAddress</c>, <c>StarRating</c>, <c>Latitude</c>, <c>Longitude</c>, etc.
     /// - <c>HotelGroupId</c> and <c>CityId</c> must reference existing entities.
-    ///
-    /// **Validation:**
-    /// - If the route ID does not match <c>command.Id</c>, the request is rejected.
-    /// - FluentValidation ensures that all required fields are valid.
-    ///
-    /// On success, no content is returned.
     /// </remarks>
     /// <param name="id">The ID of the hotel to update.</param>
     /// <param name="command">The updated hotel information.</param>
@@ -171,12 +181,6 @@ public class HotelsController : ControllerBase
     /// Deletes an existing hotel from the system.
     /// </summary>
     /// <remarks>
-    /// This endpoint permanently removes a hotel and all related data constraints must be respected.
-    ///
-    /// **Behavior:**
-    /// - A hotel cannot be deleted if it is referenced by active or historical bookings (unless cascades are configured).
-    /// - If the hotel does not exist, a <c>404 Not Found</c> is returned.
-    ///
     /// This operation is intended for Admin use only.
     /// </remarks>
     /// <param name="id">The ID of the hotel to delete.</param>

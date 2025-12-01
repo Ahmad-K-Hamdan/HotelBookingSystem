@@ -1,8 +1,8 @@
 ﻿using HotelBookingSystem.Application.Features.Guests.Commands.CreateGuest;
 using HotelBookingSystem.Application.Features.Guests.Commands.DeleteGuest;
 using HotelBookingSystem.Application.Features.Guests.Commands.UpdateGuest;
-using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestById;
-using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestById.Dtos;
+using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestDetailsById;
+using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestDetailsById.Dtos;
 using HotelBookingSystem.Application.Features.Guests.Queries.GetGuests;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -70,12 +70,12 @@ public class GuestsController : ControllerBase
     /// <param name="id">The ID of the guest to retrieve.</param>
     /// <response code="200">Successfully returned the guest details.</response>
     /// <response code="404">No guest was found with the given ID.</response>
-    [HttpGet("{id:guid}")]
+    [HttpGet("{id:guid}/details")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(GuestDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetGuestById(Guid id)
-        => Ok(await _mediator.Send(new GetGuestByIdQuery(id)));
+    public async Task<IActionResult> GetGuestDetailsById(Guid id)
+        => Ok(await _mediator.Send(new GetGuestDetailsByIdQuery(id)));
 
     /// <summary>
     /// Creates a new guest profile for the currently authenticated user.
@@ -91,8 +91,6 @@ public class GuestsController : ControllerBase
     /// **Request body (<c>CreateGuestCommand</c>) includes:**
     /// - <c>PassportNumber</c> – required, validated by FluentValidation.
     /// - <c>HomeCountry</c> – required, validated by FluentValidation.
-    ///
-    /// On success, the API returns the Guid identifier of the newly created guest.
     /// </remarks>
     /// <param name="command">The command containing guest creation details.</param>
     /// <response code="200">Guest was successfully created and the new ID was returned.</response>
@@ -105,7 +103,7 @@ public class GuestsController : ControllerBase
     public async Task<IActionResult> CreateGuest([FromBody] CreateGuestCommand command)
     {
         var id = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetGuestById), new { id }, id);
+        return CreatedAtAction(nameof(GetGuestDetailsById), new { id }, id);
     }
 
     /// <summary>
@@ -121,8 +119,6 @@ public class GuestsController : ControllerBase
     /// **Request body (<c>UpdateGuestCommand</c>) includes:**
     /// - <c>PassportNumber</c> — required, validated.
     /// - <c>HomeCountry</c> — required, validated.
-    ///
-    /// On success, the endpoint returns **204 No Content**.
     /// </remarks>
     /// <param name="id">The ID of the guest to update.</param>
     /// <param name="command">The update command containing the fields to modify.</param>
@@ -149,10 +145,6 @@ public class GuestsController : ControllerBase
     /// Deletes an existing guest from the system.
     /// </summary>
     /// <remarks>
-    /// This endpoint permanently removes the guest and relies on the underlying
-    /// data model to enforce or restrict deletion if there are related bookings
-    /// or reviews.
-    ///
     /// **Route parameter:**
     /// - <c>id</c> – the guest's unique identifier.
     /// </remarks>

@@ -1,22 +1,22 @@
 ﻿using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
-using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
+using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById.Dtos;
 using HotelBookingSystem.Domain.Entities.Hotels;
 using HotelBookingSystem.Domain.Entities.Rooms;
 using HotelBookingSystem.Domain.Entities.Visits;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
+namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelDetailsById;
 
-public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, HotelDetailsDto>
+public class GetHotelDetailsByIdQueryHandler : IRequestHandler<GetHotelDetailsByIdQuery, HotelDetailsDto>
 {
     private readonly IGenericRepository<Hotel> _hotelRepository;
     private readonly IGenericRepository<VisitLog> _visitLogRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetHotelByIdQueryHandler(
+    public GetHotelDetailsByIdQueryHandler(
         IGenericRepository<Hotel> hotelRepository,
         IGenericRepository<VisitLog> visitLogRepository,
         IUnitOfWork unitOfWork,
@@ -28,7 +28,7 @@ public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, Hotel
         _currentUserService = currentUserService;
     }
 
-    public async Task<HotelDetailsDto> Handle(GetHotelByIdQuery request, CancellationToken cancellationToken)
+    public async Task<HotelDetailsDto> Handle(GetHotelDetailsByIdQuery request, CancellationToken cancellationToken)
     {
         var hotelQuery = _hotelRepository.Query()
             .Include(h => h.City)

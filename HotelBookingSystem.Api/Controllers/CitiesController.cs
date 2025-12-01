@@ -20,7 +20,7 @@ public class CitiesController : ControllerBase
 
     /// <summary>
     /// Initializes a new instance of the CitiesController class.
-    /// </summary>   
+    /// </summary>
     /// <param name="mediator">The mediator instance for handling requests.</param>
     public CitiesController(IMediator mediator)
     {
@@ -30,6 +30,16 @@ public class CitiesController : ControllerBase
     /// <summary>
     /// Retrieves a list of all cities available in the system.
     /// </summary>
+    /// <remarks>
+    /// This endpoint is typically used to populate dropdowns or filters where the user
+    /// can choose a destination city.
+    ///
+    /// **Returned `CityDto` includes:**
+    /// - `Id` – unique identifier for the city.
+    /// - `CityName` – name of the city.
+    /// - `CountryName` – country in which the city is located.
+    /// - `Description` – optional description or marketing text for the city.
+    /// </remarks>
     /// <returns>A list of city DTOs.</returns>
     /// <response code="200">Successfully returned the list of cities.</response>
     [HttpGet]
@@ -39,8 +49,40 @@ public class CitiesController : ControllerBase
         => Ok(await _mediator.Send(new GetCitiesQuery()));
 
     /// <summary>
+    /// Retrieves the details of a specific city by its ID.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint returns full information about a single city and is useful for
+    /// admin screens or detail views.
+    ///
+    /// **Returned `CityDetailsDto` includes:**
+    /// - `Id`, `CityName`, `CountryName`, `Description`.
+    /// - `CreatedAt` – time the city entry was created.
+    /// - `UpdatedAt` – last update time (if any).
+    /// </remarks>
+    /// <param name="id">The ID of the city to retrieve.</param>
+    /// <returns>Detailed information for the requested city.</returns>
+    /// <response code="200">Successfully returned the city details.</response>
+    /// <response code="404">No city was found with the given ID.</response>
+    [HttpGet("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(CityDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetCityById(Guid id)
+        => Ok(await _mediator.Send(new GetCityByIdQuery(id)));
+
+    /// <summary>
     /// Creates a new city entry in the system.
     /// </summary>
+    /// <remarks>
+    /// This endpoint is used by the Admin interface to register a new city that can be
+    /// associated with hotels.
+    ///
+    /// **Required fields in <c>CreateCityCommand</c>:**
+    /// - `CityName` – must be non-empty, letters and spaces only, max length enforced.
+    /// - `CountryName` – must be non-empty, letters and spaces only, max length enforced.
+    /// - `Description` – optional, with maximum length and character restrictions.
+    /// </remarks>
     /// <param name="command">The command containing city creation details.</param>
     /// <returns>The ID of the newly created city.</returns>
     /// <response code="201">City was successfully created.</response>
@@ -56,24 +98,18 @@ public class CitiesController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves the details of a specific city by its ID.
-    /// </summary>
-    /// <param name="id">The ID of the city to retrieve.</param>
-    /// <returns>The details of the requested city.</returns>
-    /// <response code="200">Successfully returned the city.</response>
-    /// <response code="404">No city was found with the given ID.</response>
-    [HttpGet("{id:guid}")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(CityDetailsDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetCityById(Guid id)
-        => Ok(await _mediator.Send(new GetCityByIdQuery(id)));
-
-    /// <summary>
     /// Updates an existing city entry in the system.
     /// </summary>
+    /// <remarks>
+    /// This endpoint is used by the Admin interface to update a city's name, country,
+    /// or description.
+    ///
+    /// The request body must contain a valid <c>UpdateCityCommand</c>, which includes:
+    /// - <c>Id</c> – must match the city ID in the route.
+    /// - <c>CityName</c>, <c>CountryName</c>, <c>Description</c>.
+    /// </remarks>
     /// <param name="id">The ID of the city to update.</param>
-    /// <param name="command">The command containing city updated details.</param>
+    /// <param name="command">The updated city data.</param>
     /// <response code="204">City was successfully updated.</response>
     /// <response code="404">No city was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
@@ -96,6 +132,9 @@ public class CitiesController : ControllerBase
     /// <summary>
     /// Deletes an existing city entry from the system.
     /// </summary>
+    /// <remarks>
+    /// This operation is intended for Admin use only.
+    /// </remarks>
     /// <param name="id">The ID of the city to delete.</param>
     /// <response code="204">City was successfully deleted.</response>
     /// <response code="404">No city was found with the given ID.</response>
@@ -126,9 +165,8 @@ public class CitiesController : ControllerBase
     /// **Returned `TrendingCityDto` includes:**
     /// - `CityId`, `CityName`, `CountryName`.
     /// - `VisitCount` – number of visits aggregated across all hotels in that city.
-    /// - `ThumbnailUrl` – optional image URL, typically taken from a main image of a hotel in that city.
     ///
-    /// This is typically used for the "Trending Destination Highlights" section on the home page.
+    /// This is used for the "Trending Destination Highlights" section on the home page.
     /// </remarks>
     /// <response code="200">Successfully returned the list of trending cities.</response>
     [HttpGet("trending")]

@@ -168,8 +168,8 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
                     CountryName = a.Hotel.City.CountryName,
                     StarRating = a.Hotel.StarRating,
                     HasActiveDiscount = hasDiscount,
-                    MinOriginalPricePerNight = a.BasePricePerNight,
-                    MinDiscountedPricePerNight = a.DiscountedPricePerNight,
+                    MinTotalOriginalPricePerNight = a.BasePricePerNight,
+                    MinTotalDiscountedPricePerNight = a.DiscountedPricePerNight,
                     VisitCount = visitsQuery.Count(v => v.HotelId == a.Hotel.Id),
                     MainImageUrl = a.Hotel.Images
                         .Where(img => img.IsMain)
@@ -270,7 +270,7 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
         if (string.IsNullOrWhiteSpace(sort))
         {
             return query
-                .OrderBy(h => h.MinDiscountedPricePerNight)
+                .OrderBy(h => h.MinTotalDiscountedPricePerNight)
                 .ThenByDescending(h => h.StarRating);
         }
 
@@ -279,9 +279,9 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
         return sorting switch
         {
             "price" => query
-                .OrderBy(h => h.MinDiscountedPricePerNight),
+                .OrderBy(h => h.MinTotalDiscountedPricePerNight),
             "price desc" => query
-                .OrderByDescending(h => h.MinDiscountedPricePerNight),
+                .OrderByDescending(h => h.MinTotalDiscountedPricePerNight),
             "stars" => query
                 .OrderBy(h => h.StarRating),
             "stars desc" => query
@@ -289,7 +289,7 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
             "most visited" => query
                 .OrderByDescending(h => h.VisitCount),
             _ => query
-                .OrderBy(h => h.MinDiscountedPricePerNight)
+                .OrderBy(h => h.MinTotalDiscountedPricePerNight)
                 .ThenByDescending(h => h.StarRating)
         };
     }

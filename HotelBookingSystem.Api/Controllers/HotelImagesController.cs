@@ -77,8 +77,6 @@ public class HotelImagesController : ControllerBase
     /// - <c>HotelId</c> – the parent hotel.
     /// - <c>Url</c> – image URL (e.g. CDN path).
     /// - <c>IsMain</c> – whether this image is the main/cover image.
-    ///
-    /// On success, returns the <c>Guid</c> of the newly created image.
     /// </remarks>
     /// <param name="command">The command containing hotel image data.</param>
     /// <response code="200">Hotel image was successfully created and the new ID was returned.</response>

@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
-using HotelBookingSystem.Application.Features.PaymentMethods.Commands.UpdatePaymentMethod;
 
-namespace HotelBookingSystem.Application.Features.Discounts.Commands.UpdateDiscount;
+namespace HotelBookingSystem.Application.Features.PaymentMethods.Commands.UpdatePaymentMethod;
 
 public class UpdatePaymentMethodCommandValidator : AbstractValidator<UpdatePaymentMethodCommand>
 {

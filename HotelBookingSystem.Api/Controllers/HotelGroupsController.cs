@@ -1,8 +1,8 @@
 ﻿using HotelBookingSystem.Application.Features.HotelGroups.Commands.CreateHotelGroup;
 using HotelBookingSystem.Application.Features.HotelGroups.Commands.DeleteHotelGroup;
 using HotelBookingSystem.Application.Features.HotelGroups.Commands.UpdateHotelGroup;
-using HotelBookingSystem.Application.Features.HotelGroups.Queries.GetHotelGroups;
 using HotelBookingSystem.Application.Features.HotelGroups.Queries.GetHotelGroupById;
+using HotelBookingSystem.Application.Features.HotelGroups.Queries.GetHotelGroups;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,9 +27,18 @@ public class HotelGroupsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves a list of all hotel groups available in the system.
+    /// Retrieves all hotel groups.
     /// </summary>
-    /// <returns>A list of hotel group DTOs.</returns>
+    /// <remarks>
+    /// Hotel groups are parent organizations that own or manage multiple hotels
+    /// (e.g., "Hilton", "Marriott").
+    ///
+    /// **Returned `HotelGroupDto` (shape inferred):**
+    /// - `Id` – group identifier.
+    /// - `GroupName` – display name of the group.
+    /// - `Description` – optional description.
+    /// </remarks>
+    /// <returns>A list of hotel groups.</returns>
     /// <response code="200">Successfully returned the list of hotel groups.</response>
     [HttpGet]
     [Produces("application/json")]
@@ -38,11 +47,35 @@ public class HotelGroupsController : ControllerBase
         => Ok(await _mediator.Send(new GetHotelGroupsQuery()));
 
     /// <summary>
-    /// Creates a new hotel group entry in the system.
+    /// Retrieves the details of a specific hotel group by its ID.
     /// </summary>
+    /// <remarks>
+    /// Returns basic information about a hotel group and is typically used by admin UIs.
+    /// </remarks>
+    /// <param name="id">The ID of the hotel group to retrieve.</param>
+    /// <returns>Detailed information for the requested hotel group.</returns>
+    /// <response code="200">Successfully returned the hotel group details.</response>
+    /// <response code="404">No hotel group was found with the given ID.</response>
+    [HttpGet("{id:guid}")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(HotelGroupDetailsDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetHotelGroupById(Guid id)
+        => Ok(await _mediator.Send(new GetHotelGroupByIdQuery(id)));
+
+    /// <summary>
+    /// Creates a new hotel group in the system.
+    /// </summary>
+    /// <remarks>
+    /// Used by Admin to register a new hotel brand or chain.
+    ///
+    /// **Fields in <c>CreateHotelGroupCommand</c>:**
+    /// - `GroupName` – required, unique name of the hotel group.
+    /// - `Description` – optional additional information.
+    /// </remarks>
     /// <param name="command">The command containing hotel group creation details.</param>
     /// <returns>The ID of the newly created hotel group.</returns>
-    /// <response code="201">HotelGroup was successfully created.</response>
+    /// <response code="201">Hotel group was successfully created.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
     [Produces("application/json")]
@@ -55,25 +88,17 @@ public class HotelGroupsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves the details of a specific hotel group by its ID.
+    /// Updates an existing hotel group.
     /// </summary>
-    /// <param name="id">The ID of the hotel group to retrieve.</param>
-    /// <returns>The details of the requested hotel group.</returns>
-    /// <response code="200">Successfully returned the hotel group.</response>
-    /// <response code="404">No hotel group was found with the given ID.</response>
-    [HttpGet("{id:guid}")]
-    [Produces("application/json")]
-    [ProducesResponseType(typeof(HotelGroupDetailsDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetHotelGroupById(Guid id)
-        => Ok(await _mediator.Send(new GetHotelGroupByIdQuery(id)));
-
-    /// <summary>
-    /// Updates an existing hotel group entry in the system.
-    /// </summary>
+    /// <remarks>
+    /// Admins use this to rename or adjust details of a hotel group.
+    ///
+    /// The request body must contain a valid <c>UpdateHotelGroupCommand</c>, including:
+    /// - <c>Id</c> – must match the ID in the route.
+    /// </remarks>
     /// <param name="id">The ID of the hotel group to update.</param>
-    /// <param name="command">The command containing hotel group updated details.</param>
-    /// <response code="204">HotelGroup was successfully updated.</response>
+    /// <param name="command">The updated hotel group data.</param>
+    /// <response code="204">Hotel group was successfully updated.</response>
     /// <response code="404">No hotel group was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
@@ -93,10 +118,14 @@ public class HotelGroupsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing hotel group entry from the system.
+    /// Deletes a hotel group from the system.
     /// </summary>
+    /// <remarks>
+    /// Intended for Admin use. Deletion may be constrained if hotels are still linked
+    /// to the group.
+    /// </remarks>
     /// <param name="id">The ID of the hotel group to delete.</param>
-    /// <response code="204">HotelGroup was successfully deleted.</response>
+    /// <response code="204">Hotel group was successfully deleted.</response>
     /// <response code="404">No hotel group was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]

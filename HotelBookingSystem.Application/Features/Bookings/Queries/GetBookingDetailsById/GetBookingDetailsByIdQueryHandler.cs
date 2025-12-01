@@ -1,18 +1,18 @@
 ﻿using HotelBookingSystem.Application.Common.Exceptions;
 using HotelBookingSystem.Application.Common.Interfaces;
-using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingById.Dtos;
+using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingDetailsById.Dtos;
 using HotelBookingSystem.Domain.Entities.Bookings;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingById;
+namespace HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingDetailsById;
 
-public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, BookingDetailsDto>
+public class GetBookingDetailsByIdQueryHandler : IRequestHandler<GetBookingDetailsByIdQuery, BookingDetailsDto>
 {
     private readonly IGenericRepository<Booking> _bookingRepository;
     private readonly ICurrentUserService _currentUserService;
 
-    public GetBookingByIdQueryHandler(
+    public GetBookingDetailsByIdQueryHandler(
         IGenericRepository<Booking> bookingRepository,
         ICurrentUserService currentUserService)
     {
@@ -20,7 +20,7 @@ public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, B
         _currentUserService = currentUserService;
     }
 
-    public async Task<BookingDetailsDto> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BookingDetailsDto> Handle(GetBookingDetailsByIdQuery request, CancellationToken cancellationToken)
     {
         var userId = _currentUserService.UserId;
         if (string.IsNullOrWhiteSpace(userId))
