@@ -3,6 +3,7 @@ using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
 using HotelBookingSystem.Domain.Entities.Hotels;
 using HotelBookingSystem.Domain.Entities.Rooms;
+using HotelBookingSystem.Domain.Entities.Visits;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,20 @@ namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
 public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, HotelDetailsDto>
 {
     private readonly IGenericRepository<Hotel> _hotelRepository;
+    private readonly IGenericRepository<VisitLog> _visitLogRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GetHotelByIdQueryHandler(IGenericRepository<Hotel> hotelRepository)
+    public GetHotelByIdQueryHandler(
+        IGenericRepository<Hotel> hotelRepository,
+        IGenericRepository<VisitLog> visitLogRepository,
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService)
     {
         _hotelRepository = hotelRepository;
+        _visitLogRepository = visitLogRepository;
+        _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
     }
 
     public async Task<HotelDetailsDto> Handle(GetHotelByIdQuery request, CancellationToken cancellationToken)
@@ -28,7 +39,7 @@ public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, Hotel
                 .ThenInclude(ha => ha.Amenity)
             .Include(h => h.RoomTypes)
                 .ThenInclude(rt => rt.Rooms)
-                    .ThenInclude(r => r.Bookings)
+                    .ThenInclude(r => r.BookingRooms)
             .Include(h => h.RoomTypes)
                 .ThenInclude(rt => rt.Images)
             .Include(h => h.Reviews);
@@ -116,9 +127,24 @@ public class GetHotelByIdQueryHandler : IRequestHandler<GetHotelByIdQuery, Hotel
             ReviewCount = reviews.Count
         };
 
+        var userId = _currentUserService.UserId;
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            var visit = new VisitLog
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                HotelId = hotel.Id,
+                VisitedAt = DateTime.UtcNow
+            };
+
+            await _visitLogRepository.AddAsync(visit);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
         return dto;
     }
 
     private static bool RoomIsFree(HotelRoom room, DateOnly checkIn, DateOnly checkOut)
-        => !room.Bookings.Any(b => b.CheckInDate < checkOut && b.CheckOutDate > checkIn);
+        => !room.BookingRooms.Any(br => br.Booking.CheckInDate < checkOut && br.Booking.CheckOutDate > checkIn);
 }

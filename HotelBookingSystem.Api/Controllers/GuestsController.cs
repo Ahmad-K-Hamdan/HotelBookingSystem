@@ -19,7 +19,7 @@ public class GuestsController : ControllerBase
     private readonly IMediator _mediator;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GuestsController"/> class.
+    /// Initializes a new instance of the GuestsController class.
     /// </summary>
     /// <param name="mediator">The mediator instance for handling requests.</param>
     public GuestsController(IMediator mediator)

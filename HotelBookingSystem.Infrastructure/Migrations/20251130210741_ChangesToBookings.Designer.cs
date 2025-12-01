@@ -4,6 +4,7 @@ using HotelBookingSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HotelBookingSystem.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251130210741_ChangesToBookings")]
+    partial class ChangesToBookings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,6 +71,9 @@ namespace HotelBookingSystem.Infrastructure.Migrations
                     b.Property<Guid>("HotelId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("HotelRoomId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Nights")
                         .HasColumnType("int");
 
@@ -92,6 +98,8 @@ namespace HotelBookingSystem.Infrastructure.Migrations
                     b.HasIndex("GuestId");
 
                     b.HasIndex("HotelId");
+
+                    b.HasIndex("HotelRoomId");
 
                     b.ToTable("Booking", (string)null);
                 });
@@ -759,6 +767,10 @@ namespace HotelBookingSystem.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HotelBookingSystem.Domain.Entities.Rooms.HotelRoom", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("HotelRoomId");
+
                     b.Navigation("Guest");
 
                     b.Navigation("Hotel");
@@ -773,7 +785,7 @@ namespace HotelBookingSystem.Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("HotelBookingSystem.Domain.Entities.Rooms.HotelRoom", "HotelRoom")
-                        .WithMany("BookingRooms")
+                        .WithMany()
                         .HasForeignKey("HotelRoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1050,7 +1062,7 @@ namespace HotelBookingSystem.Infrastructure.Migrations
 
             modelBuilder.Entity("HotelBookingSystem.Domain.Entities.Rooms.HotelRoom", b =>
                 {
-                    b.Navigation("BookingRooms");
+                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("HotelBookingSystem.Domain.Entities.Rooms.HotelRoomType", b =>

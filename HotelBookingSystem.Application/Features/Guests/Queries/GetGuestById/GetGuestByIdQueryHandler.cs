@@ -57,8 +57,8 @@ public class GetGuestByIdQueryHandler : IRequestHandler<GetGuestByIdQuery, Guest
                     HotelName = b.Hotel.HotelName,
                     CheckInDate = b.CheckInDate,
                     CheckOutDate = b.CheckOutDate,
-                    NumOfAdults = b.NumOfAdults,
-                    NumOfChildren = b.NumOfChildren,
+                    NumOfAdults = b.TotalAdults,
+                    NumOfChildren = b.TotalChildren,
                     SpecialRequests = b.SpecialRequests,
                     ConfirmationCode = b.ConfirmationCode,
                     CreatedAt = b.CreatedAt

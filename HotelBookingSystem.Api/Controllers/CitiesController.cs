@@ -3,6 +3,7 @@ using HotelBookingSystem.Application.Features.Cities.Commands.DeleteCity;
 using HotelBookingSystem.Application.Features.Cities.Commands.UpdateCity;
 using HotelBookingSystem.Application.Features.Cities.Queries.GetCities;
 using HotelBookingSystem.Application.Features.Cities.Queries.GetCityById;
+using HotelBookingSystem.Application.Features.Cities.Queries.GetTrendingCities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -109,4 +110,30 @@ public class CitiesController : ControllerBase
         await _mediator.Send(new DeleteCityCommand(id));
         return NoContent();
     }
+
+    /// <summary>
+    /// Retrieves trending cities based on visit counts.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint returns the cities that have been visited the most in the system,
+    /// based on aggregated hotel visit logs.
+    ///
+    /// **Query parameters:**
+    /// - `Limit` – optional, default is 5. Maximum number of cities to return (max 20).
+    /// - `DaysBack` – optional. If provided (e.g., 30 or 90), only visits within the last N days are counted.
+    ///   If omitted, all-time visits are considered.
+    ///
+    /// **Returned `TrendingCityDto` includes:**
+    /// - `CityId`, `CityName`, `CountryName`.
+    /// - `VisitCount` – number of visits aggregated across all hotels in that city.
+    /// - `ThumbnailUrl` – optional image URL, typically taken from a main image of a hotel in that city.
+    ///
+    /// This is typically used for the "Trending Destination Highlights" section on the home page.
+    /// </remarks>
+    /// <response code="200">Successfully returned the list of trending cities.</response>
+    [HttpGet("trending")]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IEnumerable<TrendingCityDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetTrendingCities([FromQuery] GetTrendingCitiesQuery query)
+        => Ok(await _mediator.Send(query));
 }

@@ -5,7 +5,9 @@ using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotelById.Dtos;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels;
 using HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels.Dtos;
+using HotelBookingSystem.Application.Features.Hotels.Queries.GetRecentlyVisited;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -191,4 +193,36 @@ public class HotelsController : ControllerBase
         await _mediator.Send(new DeleteHotelCommand(id));
         return NoContent();
     }
+
+    /// <summary>
+    /// Retrieves the current user's recently visited hotels.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint returns a personalized list of hotels recently viewed by the authenticated user,
+    /// based on the visit logs recorded when the user opens a hotel details page.
+    ///
+    /// **Behavior:**
+    /// - Uses the user ID from the JWT to identify the current user.
+    /// - Groups visit logs by hotel and returns each hotel only once (most recent visit wins).
+    /// - Ordered by latest visit time (most recently visited first).
+    ///
+    /// **Query parameters:**
+    /// - `Limit` – optional, default is 5. Controls how many hotels are returned (max 20).
+    ///
+    /// **Returned `RecentHotelDto` includes:**
+    /// - `HotelId`, `HotelName`, `CityName`, `CountryName`, `StarRating`.
+    /// - `MainImageUrl` if available.
+    /// - `MinOriginalPricePerNight` and `MinDiscountedPricePerNight` calculated from the hotel's room types
+    ///   and active discount (if any).
+    /// - `LastVisitedAt` – timestamp of the most recent visit by this user.
+    /// </remarks>
+    /// <response code="200">Successfully returned the list of recently visited hotels.</response>
+    /// <response code="401">User is not authenticated.</response>
+    [HttpGet("recently-visited")]
+    [Authorize]
+    [Produces("application/json")]
+    [ProducesResponseType(typeof(IEnumerable<RecentHotelDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetRecentlyVisitedHotels([FromQuery] GetRecentlyVisitedHotelsQuery query)
+        => Ok(await _mediator.Send(query));
 }

@@ -18,7 +18,7 @@ public class HotelImagesController : ControllerBase
     private readonly IMediator _mediator;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="HotelImagesController"/> class.
+    /// Initializes a new instance of the HotelImagesController class.
     /// </summary>
     /// <param name="mediator">The mediator instance for handling requests.</param>
     public HotelImagesController(IMediator mediator)

@@ -18,10 +18,10 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.Property(b => b.CheckOutDate)
             .IsRequired();
 
-        builder.Property(b => b.NumOfAdults)
+        builder.Property(b => b.TotalAdults)
             .IsRequired();
 
-        builder.Property(b => b.NumOfChildren)
+        builder.Property(b => b.TotalChildren)
             .IsRequired();
 
         builder.Property(b => b.SpecialRequests)
@@ -36,7 +36,6 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         builder.HasIndex(b => b.GuestId);
         builder.HasIndex(b => b.HotelId);
-        builder.HasIndex(b => b.HotelRoomId);
 
         builder.HasOne(b => b.Guest)
             .WithMany(g => g.Bookings)
@@ -46,11 +45,6 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasOne(b => b.Hotel)
             .WithMany(h => h.Bookings)
             .HasForeignKey(b => b.HotelId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        builder.HasOne(b => b.HotelRoom)
-            .WithMany(r => r.Bookings)
-            .HasForeignKey(b => b.HotelRoomId)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

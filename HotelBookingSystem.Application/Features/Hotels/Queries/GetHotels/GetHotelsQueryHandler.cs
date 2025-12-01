@@ -30,7 +30,8 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
             .Include(h => h.Discount)
             .Include(h => h.RoomTypes)
                 .ThenInclude(rt => rt.Rooms)
-                    .ThenInclude(r => r.Bookings)
+                    .ThenInclude(r => r.BookingRooms)
+                        .ThenInclude(br => br.Booking)
             .Include(h => h.Images)
             .Include(h => h.HotelAmenities)
                 .ThenInclude(ha => ha.Amenity);
@@ -204,9 +205,15 @@ public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, Lis
     }
 
     private static bool RoomIsFree(HotelRoom room, DateOnly checkIn, DateOnly checkOut)
-        => !room.Bookings.Any(b => b.CheckInDate < checkOut && b.CheckOutDate > checkIn);
+        => !room.BookingRooms.Any(br =>
+            br.Booking.CheckInDate < checkOut &&
+            br.Booking.CheckOutDate > checkIn);
 
-    private static bool TryAssignRooms(Hotel hotel, List<RoomRequest> requests, DateOnly checkIn, DateOnly checkOut,
+    private static bool TryAssignRooms(
+        Hotel hotel,
+        List<RoomRequest> requests,
+        DateOnly checkIn,
+        DateOnly checkOut,
         out List<(HotelRoom Room, HotelRoomType Type)> assignedRooms)
     {
         assignedRooms = new List<(HotelRoom Room, HotelRoomType Type)>();
