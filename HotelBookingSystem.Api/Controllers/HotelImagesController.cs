@@ -4,6 +4,7 @@ using HotelBookingSystem.Application.Features.HotelImages.Commands.UpdateHotelIm
 using HotelBookingSystem.Application.Features.HotelImages.Queries.GetHotelImageById;
 using HotelBookingSystem.Application.Features.HotelImages.Queries.GetHotelImages;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -13,6 +14,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class HotelImagesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -39,6 +41,7 @@ public class HotelImagesController : ControllerBase
     /// </remarks>
     /// <response code="200">Successfully returned the list of hotel images.</response>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<HotelImageListDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetHotelImages()
@@ -61,6 +64,7 @@ public class HotelImagesController : ControllerBase
     /// <response code="200">Successfully returned the hotel image.</response>
     /// <response code="404">No hotel image was found with the given ID.</response>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(HotelImageDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -68,7 +72,7 @@ public class HotelImagesController : ControllerBase
         => Ok(await _mediator.Send(new GetHotelImageByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new image for a hotel.
+    /// [Manager] Creates a new image for a hotel.
     /// </summary>
     /// <remarks>
     /// This endpoint is usually used from an admin CMS to attach images to a hotel.
@@ -82,18 +86,20 @@ public class HotelImagesController : ControllerBase
     /// <response code="200">Hotel image was successfully created and the new ID was returned.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateHotelImage([FromBody] CreateHotelImageCommand command)
     {
         var id = await _mediator.Send(command);
-        return Ok(id);
-        // return CreatedAtAction(nameof(GetHotelImageById), new { id }, id);
+        return CreatedAtAction(nameof(GetHotelImageById), new { id }, id);
     }
 
     /// <summary>
-    /// Updates an existing hotel image.
+    /// [Manager] Updates an existing hotel image.
     /// </summary>
     /// <remarks>
     /// You can use this endpoint to change the image URL, toggle <c>IsMain</c>,
@@ -112,10 +118,13 @@ public class HotelImagesController : ControllerBase
     /// <response code="404">No hotel image was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateHotelImage(Guid id, [FromBody] UpdateHotelImageCommand command)
     {
         if (id != command.Id)
@@ -128,7 +137,7 @@ public class HotelImagesController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing hotel image.
+    /// [Manager] Deletes an existing hotel image.
     /// </summary>
     /// <remarks>
     /// This operation permanently removes the image record from the system.
@@ -141,10 +150,13 @@ public class HotelImagesController : ControllerBase
     /// <response code="404">No hotel image was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteHotelImage(Guid id)
     {
         await _mediator.Send(new DeleteHotelImageCommand(id));

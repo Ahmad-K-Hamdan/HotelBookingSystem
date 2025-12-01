@@ -1,9 +1,10 @@
 ﻿using HotelBookingSystem.Application.Features.Amenities.Commands.CreateAmenity;
 using HotelBookingSystem.Application.Features.Amenities.Commands.DeleteAmenity;
 using HotelBookingSystem.Application.Features.Amenities.Commands.UpdateAmenity;
-using HotelBookingSystem.Application.Features.Amenities.Queries.GetAmenityById;
 using HotelBookingSystem.Application.Features.Amenities.Queries.GetAmenities;
+using HotelBookingSystem.Application.Features.Amenities.Queries.GetAmenityById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -13,6 +14,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AmenitiesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -41,13 +43,14 @@ public class AmenitiesController : ControllerBase
     /// <returns>A list of amenity DTOs.</returns>
     /// <response code="200">Successfully returned the list of amenities.</response>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<AmenityDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAmenities()
         => Ok(await _mediator.Send(new GetAmenitiesQuery()));
 
     /// <summary>
-    /// Creates a new amenity entry in the system.
+    /// [Manager] Creates a new amenity entry in the system.
     /// </summary>
     /// <remarks>
     /// Used by Admin to register a new amenity that can be attached to hotels.
@@ -61,9 +64,12 @@ public class AmenitiesController : ControllerBase
     /// <response code="201">Amenity was successfully created.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateAmenity([FromBody] CreateAmenityCommand command)
     {
         var id = await _mediator.Send(command);
@@ -85,6 +91,7 @@ public class AmenitiesController : ControllerBase
     /// <response code="200">Successfully returned the amenity details.</response>
     /// <response code="404">No amenity was found with the given ID.</response>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(AmenityDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -92,7 +99,7 @@ public class AmenitiesController : ControllerBase
         => Ok(await _mediator.Send(new GetAmenityByIdQuery(id)));
 
     /// <summary>
-    /// Updates an existing amenity entry in the system.
+    /// [Manager] Updates an existing amenity entry in the system.
     /// </summary>
     /// <remarks>
     /// Admins use this to modify the name or description of an amenity.
@@ -107,10 +114,13 @@ public class AmenitiesController : ControllerBase
     /// <response code="404">No amenity was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateAmenity(Guid id, [FromBody] UpdateAmenityCommand command)
     {
         if (id != command.Id)
@@ -123,7 +133,7 @@ public class AmenitiesController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing amenity entry from the system.
+    /// [Manager] Deletes an existing amenity entry from the system.
     /// </summary>
     /// <remarks>
     /// Intended for Admin use only.
@@ -133,10 +143,12 @@ public class AmenitiesController : ControllerBase
     /// <response code="404">No amenity was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteAmenity(Guid id)
     {
         await _mediator.Send(new DeleteAmenityCommand(id));

@@ -5,6 +5,7 @@ using HotelBookingSystem.Application.Features.Cities.Queries.GetCities;
 using HotelBookingSystem.Application.Features.Cities.Queries.GetCityById;
 using HotelBookingSystem.Application.Features.Cities.Queries.GetTrendingCities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -14,6 +15,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CitiesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -43,6 +45,7 @@ public class CitiesController : ControllerBase
     /// <returns>A list of city DTOs.</returns>
     /// <response code="200">Successfully returned the list of cities.</response>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<CityDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCities()
@@ -65,6 +68,7 @@ public class CitiesController : ControllerBase
     /// <response code="200">Successfully returned the city details.</response>
     /// <response code="404">No city was found with the given ID.</response>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(CityDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -72,7 +76,7 @@ public class CitiesController : ControllerBase
         => Ok(await _mediator.Send(new GetCityByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new city entry in the system.
+    /// [Manager] Creates a new city entry in the system.
     /// </summary>
     /// <remarks>
     /// This endpoint is used by the Admin interface to register a new city that can be
@@ -88,9 +92,12 @@ public class CitiesController : ControllerBase
     /// <response code="201">City was successfully created.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateCity([FromBody] CreateCityCommand command)
     {
         var id = await _mediator.Send(command);
@@ -98,7 +105,7 @@ public class CitiesController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an existing city entry in the system.
+    /// [Manager] Updates an existing city entry in the system.
     /// </summary>
     /// <remarks>
     /// This endpoint is used by the Admin interface to update a city's name, country,
@@ -114,10 +121,13 @@ public class CitiesController : ControllerBase
     /// <response code="404">No city was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateCity(Guid id, [FromBody] UpdateCityCommand command)
     {
         if (id != command.Id)
@@ -130,7 +140,7 @@ public class CitiesController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing city entry from the system.
+    /// [Manager] Deletes an existing city entry from the system.
     /// </summary>
     /// <remarks>
     /// This operation is intended for Admin use only.
@@ -140,10 +150,13 @@ public class CitiesController : ControllerBase
     /// <response code="404">No city was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteCity(Guid id)
     {
         await _mediator.Send(new DeleteCityCommand(id));
@@ -170,6 +183,7 @@ public class CitiesController : ControllerBase
     /// </remarks>
     /// <response code="200">Successfully returned the list of trending cities.</response>
     [HttpGet("trending")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<TrendingCityDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetTrendingCities([FromQuery] GetTrendingCitiesQuery query)

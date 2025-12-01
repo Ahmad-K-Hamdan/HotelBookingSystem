@@ -1,9 +1,10 @@
 ﻿using HotelBookingSystem.Application.Features.Discounts.Commands.CreateDiscount;
 using HotelBookingSystem.Application.Features.Discounts.Commands.DeleteDiscount;
 using HotelBookingSystem.Application.Features.Discounts.Commands.UpdateDiscount;
-using HotelBookingSystem.Application.Features.Discounts.Queries.GetDiscounts;
 using HotelBookingSystem.Application.Features.Discounts.Queries.GetDiscountById;
+using HotelBookingSystem.Application.Features.Discounts.Queries.GetDiscounts;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -13,6 +14,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Manager")]
 public class DiscountsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -27,7 +29,7 @@ public class DiscountsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves a list of all discounts available in the system.
+    /// [Manager] Retrieves a list of all discounts available in the system.
     /// </summary>
     /// <remarks>
     /// This endpoint is typically used by admin tools or back-office UIs to view all
@@ -44,11 +46,13 @@ public class DiscountsController : ControllerBase
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<DiscountDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetDiscounts()
         => Ok(await _mediator.Send(new GetDiscountsQuery()));
 
     /// <summary>
-    /// Creates a new discount entry in the system.
+    /// [Manager] Creates a new discount entry in the system.
     /// </summary>
     /// <remarks>
     /// Used by the Admin interface to define new promotional discounts that can be
@@ -70,6 +74,8 @@ public class DiscountsController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateDiscount([FromBody] CreateDiscountCommand command)
     {
         var id = await _mediator.Send(command);
@@ -77,7 +83,7 @@ public class DiscountsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves the details of a specific discount by its ID.
+    /// [Manager] Retrieves the details of a specific discount by its ID.
     /// </summary>
     /// <remarks>
     /// Returns the full discount information as stored in the system.
@@ -93,11 +99,13 @@ public class DiscountsController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(DiscountDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetDiscountById(Guid id)
         => Ok(await _mediator.Send(new GetDiscountByIdQuery(id)));
 
     /// <summary>
-    /// Updates an existing discount entry in the system.
+    /// [Manager] Updates an existing discount entry in the system.
     /// </summary>
     /// <remarks>
     /// Admins can use this endpoint to adjust a discount's description, rate, or active status.
@@ -121,6 +129,8 @@ public class DiscountsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateDiscount(Guid id, [FromBody] UpdateDiscountCommand command)
     {
         if (id != command.Id)
@@ -133,7 +143,7 @@ public class DiscountsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing discount entry from the system.
+    /// [Manager] Deletes an existing discount entry from the system.
     /// </summary>
     /// <remarks>
     /// Intended for Admin use only.
@@ -150,6 +160,8 @@ public class DiscountsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteDiscount(Guid id)
     {
         await _mediator.Send(new DeleteDiscountCommand(id));

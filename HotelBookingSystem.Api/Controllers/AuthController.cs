@@ -3,6 +3,7 @@ using HotelBookingSystem.Application.Features.Authentication.Commands.Login;
 using HotelBookingSystem.Application.Features.Authentication.Commands.PasswordReset;
 using HotelBookingSystem.Application.Features.Authentication.Commands.Register;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -12,6 +13,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[AllowAnonymous]
 public class AuthController : ControllerBase
 {
     private readonly IMediator _mediator;

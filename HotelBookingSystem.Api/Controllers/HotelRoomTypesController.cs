@@ -5,6 +5,7 @@ using HotelBookingSystem.Application.Features.HotelRoomTypes.Queries.GetHotelRoo
 using HotelBookingSystem.Application.Features.HotelRoomTypes.Queries.GetHotelRoomTypeById.Dtos;
 using HotelBookingSystem.Application.Features.HotelRoomTypes.Queries.GetHotelRoomTypes;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -14,6 +15,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Manager")]
 public class HotelRoomTypesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -28,7 +30,7 @@ public class HotelRoomTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves all hotel room types.
+    /// [Manager] Retrieves all hotel room types.
     /// </summary>
     /// <remarks>
     /// This endpoint is typically used in the admin or back-office UI to list
@@ -44,11 +46,13 @@ public class HotelRoomTypesController : ControllerBase
     [HttpGet]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<HotelRoomTypeListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetHotelRoomTypes()
         => Ok(await _mediator.Send(new GetHotelRoomTypesQuery()));
 
     /// <summary>
-    /// Retrieves a specific hotel room type by its ID,
+    /// [Manager] Retrieves a specific hotel room type by its ID,
     /// including its parent hotel and rooms.
     /// </summary>
     /// <remarks>
@@ -73,11 +77,13 @@ public class HotelRoomTypesController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(HotelRoomTypeDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetHotelRoomTypeById(Guid id)
         => Ok(await _mediator.Send(new GetHotelRoomTypeByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new room type for a hotel.
+    /// [Manager] Creates a new room type for a hotel.
     /// </summary>
     /// <remarks>
     /// This endpoint is usually used by admins when configuring a hotel's inventory
@@ -98,15 +104,16 @@ public class HotelRoomTypesController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateHotelRoomType([FromBody] CreateHotelRoomTypeCommand command)
     {
         var id = await _mediator.Send(command);
-        return Ok(id);
-        // return CreatedAtAction(nameof(GetHotelRoomTypeById), new { id }, id);
+        return CreatedAtAction(nameof(GetHotelRoomTypeById), new { id }, id);
     }
 
     /// <summary>
-    /// Updates an existing room type.
+    /// [Manager] Updates an existing room type.
     /// </summary>
     /// <remarks>
     /// This endpoint updates the configuration of a room type.
@@ -132,6 +139,8 @@ public class HotelRoomTypesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateHotelRoomType(Guid id, [FromBody] UpdateHotelRoomTypeCommand command)
     {
         if (id != command.Id)
@@ -144,7 +153,7 @@ public class HotelRoomTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing room type.
+    /// [Manager] Deletes an existing room type.
     /// </summary>
     /// <remarks>
     /// **Route parameter:**
@@ -159,6 +168,8 @@ public class HotelRoomTypesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteHotelRoomType(Guid id)
     {
         await _mediator.Send(new DeleteHotelRoomTypeCommand(id));

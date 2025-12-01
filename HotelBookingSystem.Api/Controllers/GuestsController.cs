@@ -5,6 +5,7 @@ using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestDetailsById
 using HotelBookingSystem.Application.Features.Guests.Queries.GetGuestDetailsById.Dtos;
 using HotelBookingSystem.Application.Features.Guests.Queries.GetGuests;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -14,6 +15,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class GuestsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -28,7 +30,7 @@ public class GuestsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves all guests in the system.
+    /// [Manager] Retrieves all guests in the system.
     /// </summary>
     /// <remarks>
     /// This endpoint is typically intended for administrative views,
@@ -42,13 +44,16 @@ public class GuestsController : ControllerBase
     /// </remarks>
     /// <response code="200">Successfully returned the list of guests.</response>
     [HttpGet]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<GuestListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetGuests()
         => Ok(await _mediator.Send(new GetGuestsQuery()));
 
     /// <summary>
-    /// Retrieves detailed information about a specific guest.
+    /// [Manager] Retrieves detailed information about a specific guest.
     /// </summary>
     /// <remarks>
     /// This endpoint returns the guest's basic profile, along with
@@ -71,14 +76,17 @@ public class GuestsController : ControllerBase
     /// <response code="200">Successfully returned the guest details.</response>
     /// <response code="404">No guest was found with the given ID.</response>
     [HttpGet("{id:guid}/details")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(GuestDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetGuestDetailsById(Guid id)
         => Ok(await _mediator.Send(new GetGuestDetailsByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new guest profile for the currently authenticated user.
+    /// [Authenticated] Creates a new guest profile for the currently authenticated user.
     /// </summary>
     /// <remarks>
     /// This endpoint is typically called after a user account is created
@@ -97,9 +105,11 @@ public class GuestsController : ControllerBase
     /// <response code="401">The user is not authenticated.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateGuest([FromBody] CreateGuestCommand command)
     {
         var id = await _mediator.Send(command);
@@ -107,7 +117,7 @@ public class GuestsController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an existing guest’s profile.
+    /// [Authenticated] Updates an existing guest’s profile.
     /// </summary>
     /// <remarks>
     /// This endpoint allows updating a guest’s **passport number** and **home country**.
@@ -126,10 +136,11 @@ public class GuestsController : ControllerBase
     /// <response code="404">No guest was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateGuest(Guid id, [FromBody] UpdateGuestCommand command)
     {
         if (id != command.Id)
@@ -142,7 +153,7 @@ public class GuestsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing guest from the system.
+    /// [Authenticated] Deletes an existing guest from the system.
     /// </summary>
     /// <remarks>
     /// **Route parameter:**
@@ -153,6 +164,7 @@ public class GuestsController : ControllerBase
     /// <response code="404">No guest was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

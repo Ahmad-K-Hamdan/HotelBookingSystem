@@ -4,6 +4,7 @@ using HotelBookingSystem.Application.Features.PaymentMethods.Commands.UpdatePaym
 using HotelBookingSystem.Application.Features.PaymentMethods.Queries.GetPaymentMethodById;
 using HotelBookingSystem.Application.Features.PaymentMethods.Queries.GetPaymentMethods;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -13,6 +14,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class PaymentMethodsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -42,13 +44,14 @@ public class PaymentMethodsController : ControllerBase
     /// <returns>A list of payment methods.</returns>
     /// <response code="200">Successfully returned the list of payment methods.</response>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<PaymentMethodDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetPaymentMethods()
         => Ok(await _mediator.Send(new GetPaymentMethodsQuery()));
 
     /// <summary>
-    /// Retrieves the details of a specific payment method by its ID.
+    /// [Manager] Retrieves the details of a specific payment method by its ID.
     /// </summary>
     /// <remarks>
     /// Typically used by admin tools to edit or review a specific payment method.
@@ -58,14 +61,17 @@ public class PaymentMethodsController : ControllerBase
     /// <response code="200">Successfully returned the payment method details.</response>
     /// <response code="404">No payment method was found with the given ID.</response>
     [HttpGet("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(PaymentMethodDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetPaymentMethodById(Guid id)
         => Ok(await _mediator.Send(new GetPaymentMethodByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new payment method in the system.
+    /// [Manager] Creates a new payment method in the system.
     /// </summary>
     /// <remarks>
     /// Used by Admin to register a new way of paying.
@@ -78,9 +84,12 @@ public class PaymentMethodsController : ControllerBase
     /// <response code="201">Payment method was successfully created.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreatePaymentMethod([FromBody] CreatePaymentMethodCommand command)
     {
         var id = await _mediator.Send(command);
@@ -88,7 +97,7 @@ public class PaymentMethodsController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an existing payment method.
+    /// [Manager] Updates an existing payment method.
     /// </summary>
     /// <remarks>
     /// Admins use this to rename or adjust properties of a payment method.
@@ -103,10 +112,13 @@ public class PaymentMethodsController : ControllerBase
     /// <response code="404">No payment method was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdatePaymentMethod(Guid id, [FromBody] UpdatePaymentMethodCommand command)
     {
         if (id != command.Id)
@@ -119,7 +131,7 @@ public class PaymentMethodsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes a payment method from the system.
+    /// [Manager] Deletes a payment method from the system.
     /// </summary>
     /// <remarks>
     /// Intended for Admin use. 
@@ -129,10 +141,13 @@ public class PaymentMethodsController : ControllerBase
     /// <response code="404">No payment method was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeletePaymentMethod(Guid id)
     {
         await _mediator.Send(new DeletePaymentMethodCommand(id));

@@ -4,6 +4,7 @@ using HotelBookingSystem.Application.Features.RoomTypeImages.Commands.UpdateRoom
 using HotelBookingSystem.Application.Features.RoomTypeImages.Queries.GetRoomTypeImageById;
 using HotelBookingSystem.Application.Features.RoomTypeImages.Queries.GetRoomTypeImages;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -13,6 +14,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class RoomTypeImagesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -39,6 +41,7 @@ public class RoomTypeImagesController : ControllerBase
     /// </remarks>
     /// <response code="200">Successfully returned the list of room-type images.</response>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<RoomTypeImageListDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetRoomTypeImages()
@@ -63,6 +66,7 @@ public class RoomTypeImagesController : ControllerBase
     /// <response code="200">Successfully returned the room-type image.</response>
     /// <response code="404">No room-type image was found with the given ID.</response>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(RoomTypeImageDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -70,7 +74,7 @@ public class RoomTypeImagesController : ControllerBase
         => Ok(await _mediator.Send(new GetRoomTypeImageByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new image for a specific room type.
+    /// [Manager] Creates a new image for a specific room type.
     /// </summary>
     /// <remarks>
     /// Use this when building the gallery for each room type (e.g. "Deluxe King").
@@ -84,18 +88,20 @@ public class RoomTypeImagesController : ControllerBase
     /// <response code="200">Room-type image was successfully created and the new ID was returned.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateRoomTypeImage([FromBody] CreateRoomTypeImageCommand command)
     {
         var id = await _mediator.Send(command);
-        return Ok(id);
-        // return CreatedAtAction(nameof(GetRoomTypeImageById), new { id }, id);
+        return CreatedAtAction(nameof(GetRoomTypeImageById), new { id }, id);
     }
 
     /// <summary>
-    /// Updates an existing room-type image.
+    /// [Manager] Updates an existing room-type image.
     /// </summary>
     /// <remarks>
     /// This can change which room type the image belongs to, update the URL, or toggle <c>IsMain</c>.
@@ -113,10 +119,13 @@ public class RoomTypeImagesController : ControllerBase
     /// <response code="404">No room-type image was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateRoomTypeImage(Guid id, [FromBody] UpdateRoomTypeImageCommand command)
     {
         if (id != command.Id)
@@ -129,7 +138,7 @@ public class RoomTypeImagesController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing room-type image.
+    /// [Manager] Deletes an existing room-type image.
     /// </summary>
     /// <remarks>
     /// This permanently removes the image record.
@@ -142,10 +151,13 @@ public class RoomTypeImagesController : ControllerBase
     /// <response code="404">No room-type image was found with the given ID.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteRoomTypeImage(Guid id)
     {
         await _mediator.Send(new DeleteRoomTypeImageCommand(id));

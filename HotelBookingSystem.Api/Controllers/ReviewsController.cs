@@ -5,6 +5,7 @@ using HotelBookingSystem.Application.Features.Reviews.Queries.GetReviewById;
 using HotelBookingSystem.Application.Features.Reviews.Queries.GetReviewById.Dtos;
 using HotelBookingSystem.Application.Features.Reviews.Queries.GetReviews;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HotelBookingSystem.Api.Controllers;
@@ -14,6 +15,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ReviewsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -41,6 +43,7 @@ public class ReviewsController : ControllerBase
     /// </remarks>
     /// <response code="200">Successfully returned the list of reviews.</response>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<ReviewListDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetReviews()
@@ -67,6 +70,7 @@ public class ReviewsController : ControllerBase
     /// <response code="200">Successfully returned the review details.</response>
     /// <response code="404">No review was found with the given ID.</response>
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(ReviewDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -74,7 +78,7 @@ public class ReviewsController : ControllerBase
         => Ok(await _mediator.Send(new GetReviewByIdQuery(id)));
 
     /// <summary>
-    /// Creates a new review for a hotel.
+    /// [Authenticated] Creates a new review for a hotel.
     /// </summary>
     /// <remarks>
     /// This endpoint allows a guest to submit a review for a specific hotel.
@@ -92,15 +96,15 @@ public class ReviewsController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreateReview([FromBody] CreateReviewCommand command)
     {
         var id = await _mediator.Send(command);
-        return Ok(id);
-        // return CreatedAtAction(nameof(GetReviewById), new { id }, id);
+        return CreatedAtAction(nameof(GetReviewById), new { id }, id);
     }
 
     /// <summary>
-    /// Updates an existing review.
+    /// [Authenticated] Updates an existing review.
     /// </summary>
     /// <remarks>
     /// This endpoint allows updating the review's rating and comment.
@@ -124,6 +128,7 @@ public class ReviewsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> UpdateReview(Guid id, [FromBody] UpdateReviewCommand command)
     {
         if (id != command.Id)
@@ -136,7 +141,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing review from the system.
+    /// [Authenticated] Deletes an existing review from the system.
     /// </summary>
     /// <remarks>
     /// **Route parameter:**
@@ -151,6 +156,7 @@ public class ReviewsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> DeleteReview(Guid id)
     {
         await _mediator.Send(new DeleteReviewCommand(id));

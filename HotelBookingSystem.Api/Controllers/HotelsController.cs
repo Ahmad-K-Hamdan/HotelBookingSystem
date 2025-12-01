@@ -17,6 +17,7 @@ namespace HotelBookingSystem.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class HotelsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -68,6 +69,7 @@ public class HotelsController : ControllerBase
     /// - Main hotel image and amenity names.
     /// </remarks>
     [HttpGet]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<HotelDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -75,7 +77,7 @@ public class HotelsController : ControllerBase
         => Ok(await _mediator.Send(getHotelsQuery));
 
     /// <summary>
-    /// Creates a new hotel in the system.
+    /// [Manager] Creates a new hotel in the system.
     /// </summary>
     /// <remarks>
     /// This endpoint is used by the Admin interface to register a new hotel.
@@ -91,9 +93,12 @@ public class HotelsController : ControllerBase
     /// <response code="200">Hotel was successfully created and the new ID was returned.</response>
     /// <response code="400">The request was invalid.</response>
     [HttpPost]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateHotel([FromBody] CreateHotelDto createHotelDto)
     {
         var id = await _mediator.Send(new CreateHotelCommand(createHotelDto));
@@ -136,6 +141,7 @@ public class HotelsController : ControllerBase
     /// <response code="404">No hotel was found with the given ID.</response>
     /// <response code="400">Invalid request, such as an invalid date range.</response>
     [HttpGet("{id:guid}/details")]
+    [AllowAnonymous]
     [Produces("application/json")]
     [ProducesResponseType(typeof(HotelDetailsDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -146,7 +152,7 @@ public class HotelsController : ControllerBase
     }
 
     /// <summary>
-    /// Updates an existing hotel in the system.
+    /// [Manager] Updates an existing hotel in the system.
     /// </summary>
     /// <remarks>
     /// This endpoint is used by the Admin interface to modify hotel information.
@@ -162,10 +168,13 @@ public class HotelsController : ControllerBase
     /// <response code="404">No hotel was found with the given ID.</response>
     /// <response code="400">The request is invalid.</response>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateHotel(Guid id, [FromBody] UpdateHotelCommand command)
     {
         if (id != command.Id)
@@ -178,7 +187,7 @@ public class HotelsController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes an existing hotel from the system.
+    /// [Manager] Deletes an existing hotel from the system.
     /// </summary>
     /// <remarks>
     /// This operation is intended for Admin use only.
@@ -188,10 +197,13 @@ public class HotelsController : ControllerBase
     /// <response code="404">No hotel was found with the given ID.</response>
     /// <response code="400">Invalid request.</response>
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager")]
     [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteHotel(Guid id)
     {
         await _mediator.Send(new DeleteHotelCommand(id));
@@ -199,7 +211,7 @@ public class HotelsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves the current user's recently visited hotels.
+    /// [Authenticated] Retrieves the current user's recently visited hotels.
     /// </summary>
     /// <remarks>
     /// This endpoint returns a personalized list of hotels recently viewed by the authenticated user,

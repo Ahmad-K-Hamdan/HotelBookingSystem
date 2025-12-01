@@ -30,7 +30,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Creates a new booking for the current guest.
+    /// [Authenticated] Creates a new booking for the current guest.
     /// </summary>
     /// <remarks>
     /// This endpoint is used from the Secure Checkout flow to confirm a booking.
@@ -75,7 +75,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves a detailed view of a specific booking for the current guest.
+    /// [Authenticated] Retrieves a detailed view of a specific booking for the current guest.
     /// </summary>
     /// <remarks>
     /// This endpoint returns a rich view of a booking, including:
@@ -115,7 +115,7 @@ public class BookingsController : ControllerBase
         => Ok(await _mediator.Send(new GetBookingDetailsByIdQuery(id)));
 
     /// <summary>
-    /// Retrieves all bookings for the current guest.
+    /// [Authenticated] Retrieves all bookings for the current guest.
     /// </summary>
     /// <remarks>
     /// This endpoint is typically used in a "My Bookings" page.
@@ -143,7 +143,7 @@ public class BookingsController : ControllerBase
         => Ok(await _mediator.Send(query));
 
     /// <summary>
-    /// Records a payment for a specific booking.
+    /// [Authenticated] Records a payment for a specific booking.
     /// </summary>
     /// <remarks>
     /// This endpoint is part of the checkout / payment flow.
@@ -175,8 +175,8 @@ public class BookingsController : ControllerBase
     [Produces("application/json")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> CreatePaymentForBooking(Guid bookingId, [FromBody] CreatePaymentForBookingCommand command)
     {
         command.BookingId = bookingId;
@@ -185,7 +185,7 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
-    /// Retrieves all payments recorded for a specific booking.
+    /// [Authenticated] Retrieves all payments recorded for a specific booking.
     /// </summary>
     /// <remarks>
     /// Only the owner of the booking may view its payments.
@@ -205,8 +205,8 @@ public class BookingsController : ControllerBase
     [HttpGet("{bookingId:guid}/payments")]
     [Produces("application/json")]
     [ProducesResponseType(typeof(IEnumerable<PaymentDto>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetPaymentsForBooking(Guid bookingId)
         => Ok(await _mediator.Send(new GetPaymentsForBookingQuery(bookingId)));
 }
