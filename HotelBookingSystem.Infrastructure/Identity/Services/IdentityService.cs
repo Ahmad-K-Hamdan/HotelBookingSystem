@@ -3,7 +3,6 @@ using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
 
 namespace HotelBookingSystem.Infrastructure.Identity.Services;

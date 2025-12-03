@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HotelBookingSystem.Application.Features.Hotels.GetHotels;
 
-public partial class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, List<HotelDto>>
+public class GetHotelsQueryHandler : IRequestHandler<GetHotelsQuery, List<HotelDto>>
 {
     private readonly IGenericRepository<Hotel> _hotelRepository;
     private readonly IGenericRepository<VisitLog> _visitLogRepository;

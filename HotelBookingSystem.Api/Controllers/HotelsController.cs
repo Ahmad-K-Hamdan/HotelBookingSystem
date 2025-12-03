@@ -87,6 +87,7 @@ public class HotelsController : ControllerBase
     /// - `CityId` — the ID of the city where the hotel is located.
     /// - `HotelName` and `HotelAddress` — the hotel's identity and physical location.
     /// - `StarRating`, `Latitude`, `Longitude`, and `Description` — essential rating and geo information.
+    /// - `AmenityIds` — optional list of amenity IDs to assign to this hotel.
     /// </remarks>
     /// <param name="createHotelDto">The data required to create a new hotel.</param>
     /// <returns>The ID of the newly created hotel.</returns>
@@ -241,32 +242,4 @@ public class HotelsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetRecentlyVisitedHotels([FromQuery] GetRecentlyVisitedHotelsQuery query)
         => Ok(await _mediator.Send(query));
-
-    /// <summary>
-    /// [Manager] Replaces the list of amenities assigned to a specific hotel.
-    /// </summary>
-    /// <remarks>
-    /// This is an admin-only endpoint used by the back-office to manage hotel amenities.
-    ///
-    /// - The route <c>id</c> is the hotel ID.
-    /// - The body contains the full list of amenity IDs to assign.
-    /// - Any amenities not in the list will be removed.
-    /// - Sending an empty list clears all amenities from the hotel.
-    /// </remarks>
-    /// <param name="id">The ID of the hotel.</param>
-    /// <param name="dto">The amenity IDs to assign to the hotel.</param>
-    /// <response code="204">Amenities were successfully updated.</response>
-    /// <response code="404">Hotel or one of the amenities was not found.</response>
-    /// <response code="400">Invalid request.</response>
-    [HttpPut("{id:guid}/amenities")]
-    [Authorize(Roles = "Manager")]
-    [Produces("application/json")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateHotelAmenities(Guid id, [FromBody] UpdateHotelAmenitiesDto dto)
-    {
-        await _mediator.Send(new UpdateHotelAmenitiesCommand(id, dto.AmenityIds));
-        return NoContent();
-    }
 }

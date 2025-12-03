@@ -1,16 +1,13 @@
 ﻿using HotelBookingSystem.Domain.Entities.Hotels;
 using HotelBookingSystem.Domain.Entities.Rooms;
 
-namespace HotelBookingSystem.Application.Features.Hotels.GetHotels;
+namespace HotelBookingSystem.Application.Features.Hotels.Queries.GetHotels;
 
-public partial class GetHotelsQueryHandler
+public class HotelAssignment
 {
-    private sealed class HotelAssignment
-    {
-        public Hotel Hotel { get; set; } = null!;
-        public List<(HotelRoom Room, HotelRoomType Type)> AssignedRooms { get; set; } = new();
-        public decimal BasePricePerNight { get; set; }
-        public decimal DiscountedPricePerNight { get; set; }
-        public decimal TotalDiscountedPrice { get; set; }
-    }
+    public Hotel Hotel { get; set; } = null!;
+    public List<(HotelRoom Room, HotelRoomType Type)> AssignedRooms { get; set; } = new();
+    public decimal BasePricePerNight { get; set; }
+    public decimal DiscountedPricePerNight { get; set; }
+    public decimal TotalDiscountedPrice { get; set; }
 }
