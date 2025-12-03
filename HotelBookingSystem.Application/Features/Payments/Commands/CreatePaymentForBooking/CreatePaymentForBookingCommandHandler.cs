@@ -17,19 +17,28 @@ public class CreatePaymentForBookingCommandHandler : IRequestHandler<CreatePayme
     private readonly IGenericRepository<PaymentMethod> _paymentMethodRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IIdentityService _identityService;
+    private readonly IEmailService _emailService;
+    private readonly IPaymentEmailTemplateService _templateService;
 
     public CreatePaymentForBookingCommandHandler(
         IGenericRepository<Booking> bookingRepository,
         IGenericRepository<Payment> paymentRepository,
         IGenericRepository<PaymentMethod> paymentMethodRepository,
         ICurrentUserService currentUserService,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IIdentityService identityService,
+        IEmailService emailService,
+        IPaymentEmailTemplateService templateService)
     {
         _bookingRepository = bookingRepository;
         _paymentRepository = paymentRepository;
         _paymentMethodRepository = paymentMethodRepository;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
+        _identityService = identityService;
+        _emailService = emailService;
+        _templateService = templateService;
     }
 
     public async Task<Guid> Handle(CreatePaymentForBookingCommand request, CancellationToken cancellationToken)
@@ -44,6 +53,7 @@ public class CreatePaymentForBookingCommandHandler : IRequestHandler<CreatePayme
             .Include(b => b.Guest)
             .Include(b => b.Payments)
             .Include(b => b.Hotel)
+                .ThenInclude(h => h.City)
             .FirstOrDefaultAsync(b => b.Id == request.BookingId, cancellationToken);
 
         if (booking is null)
@@ -94,6 +104,39 @@ public class CreatePaymentForBookingCommandHandler : IRequestHandler<CreatePayme
 
         await _paymentRepository.AddAsync(payment);
         await _unitOfWork.SaveChangesAsync();
+
+        await SendPaymentConfirmationEmailAsync(booking, payment, booking.TotalDiscountedPrice);
+
         return payment.Id;
+    }
+
+    private async Task SendPaymentConfirmationEmailAsync(Booking booking, Payment payment, decimal totalDue)
+    {
+        try
+        {
+            var userEmail = await _identityService.GetUserEmailByIdAsync(booking.Guest.UserId);
+            if (string.IsNullOrWhiteSpace(userEmail))
+            {
+                return;
+            }
+
+            var totalPaid = booking.Payments
+                .Where(p => p.PaymentStatus == PaymentStatus.Completed)
+                .Sum(p => p.PaymentAmount) + payment.PaymentAmount;
+
+            var remaining = totalDue - totalPaid;
+            if (remaining < 0)
+            {
+                remaining = 0;
+            }
+
+            var subject = $"Payment confirmation for booking {booking.ConfirmationCode}";
+            var emailBody = _templateService.GeneratePaymentConfirmationEmail(booking, payment, totalDue, totalPaid, remaining);
+            await _emailService.SendEmailAsync(userEmail, subject, emailBody);
+        }
+        catch
+        {
+            // We do not want to interrupt the main logic
+        }
     }
 }

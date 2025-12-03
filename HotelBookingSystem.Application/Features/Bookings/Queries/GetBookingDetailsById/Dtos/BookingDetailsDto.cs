@@ -15,11 +15,13 @@ public class BookingDetailsDto
     public decimal TotalDiscountedPrice { get; set; }
     public Guid HotelId { get; set; }
     public string HotelName { get; set; } = null!;
+    public string HotelAddress { get; set; } = null!;
     public string CityName { get; set; } = null!;
     public string CountryName { get; set; } = null!;
     public int StarRating { get; set; }
     public Guid GuestId { get; set; }
     public string GuestHomeCountry { get; set; } = null!;
-
+    public string GuestFullName { get; set; } = null!;
+    public string? GuestPassportNumber { get; set; } = null!;
     public List<BookingRoomDto> Rooms { get; set; } = new();
 }

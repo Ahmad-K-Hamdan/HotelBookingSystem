@@ -1,6 +1,7 @@
 ﻿using HotelBookingSystem.Application.Features.Bookings.Commands.CreateBooking;
 using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingDetailsById;
 using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingDetailsById.Dtos;
+using HotelBookingSystem.Application.Features.Bookings.Queries.GetBookingInvoicePdf;
 using HotelBookingSystem.Application.Features.Bookings.Queries.GetMyBookings;
 using HotelBookingSystem.Application.Features.Payments.Commands.CreatePaymentForBooking;
 using HotelBookingSystem.Application.Features.Payments.Queries.GetPaymentsForBooking;
@@ -209,4 +210,24 @@ public class BookingsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetPaymentsForBooking(Guid bookingId)
         => Ok(await _mediator.Send(new GetPaymentsForBookingQuery(bookingId)));
+
+    /// <summary>
+    /// [Authenticated] Downloads the booking invoice as a PDF file for printing or saving.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint is intended for the Booking Confirmation page.
+    /// It generates a PDF with booking and pricing details identical to the confirmation view.
+    /// </remarks>
+    /// <param name="id">The booking ID.</param>
+    /// <returns>PDF file containing the booking invoice.</returns>
+    /// <response code="200">PDF generated successfully.</response>
+    /// <response code="404">Booking not found.</response>
+    [HttpGet("{id:guid}/invoice")]
+    [Authorize]
+    [Produces("application/pdf")]
+    public async Task<IActionResult> DownloadInvoice(Guid id)
+    {
+        var pdfBytes = await _mediator.Send(new GetBookingInvoicePdfQuery(id));
+        return File(pdfBytes, "application/pdf", $"booking-{id}-invoice.pdf");
+    }
 }

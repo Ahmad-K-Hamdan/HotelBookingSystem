@@ -16,7 +16,6 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IGenericRepository<Booking> _bookingRepository;
     private readonly IGenericRepository<BookingRoom> _bookingRoomRepository;
     private readonly IGenericRepository<HotelRoomType> _roomTypeRepository;
-    private readonly IGenericRepository<HotelRoom> _roomRepository;
     private readonly IGenericRepository<Guest> _guestRepository;
     private readonly IGenericRepository<Hotel> _hotelRepository;
     private readonly ICurrentUserService _currentUserService;
@@ -26,7 +25,6 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         IGenericRepository<Booking> bookingRepository,
         IGenericRepository<BookingRoom> bookingRoomRepository,
         IGenericRepository<HotelRoomType> roomTypeRepository,
-        IGenericRepository<HotelRoom> roomRepository,
         IGenericRepository<Guest> guestRepository,
         IGenericRepository<Hotel> hotelRepository,
         ICurrentUserService currentUserService,
@@ -35,7 +33,6 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         _bookingRepository = bookingRepository;
         _bookingRoomRepository = bookingRoomRepository;
         _roomTypeRepository = roomTypeRepository;
-        _roomRepository = roomRepository;
         _guestRepository = guestRepository;
         _hotelRepository = hotelRepository;
         _currentUserService = currentUserService;

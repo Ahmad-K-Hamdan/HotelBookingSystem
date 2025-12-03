@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuestPDF.Infrastructure;
 using SendGrid;
 
 namespace HotelBookingSystem.Infrastructure;
@@ -50,6 +51,11 @@ public static class DependencyInjection
         // Services 
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IPaymentEmailTemplateService, PaymentEmailTemplateService>();
+        services.AddScoped<IBookingInvoicePdfGenerator, BookingInvoicePdfGenerator>();
+
+        // Configure QuestPDF license
+        QuestPDF.Settings.License = LicenseType.Community;
 
         // Auto mapper
         services.AddAutoMapper(cfg =>

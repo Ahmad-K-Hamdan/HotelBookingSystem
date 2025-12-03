@@ -40,6 +40,7 @@ public class GetHotelDetailsByIdQueryHandler : IRequestHandler<GetHotelDetailsBy
             .Include(h => h.RoomTypes)
                 .ThenInclude(rt => rt.Rooms)
                     .ThenInclude(r => r.BookingRooms)
+                        .ThenInclude(br => br.Booking)
             .Include(h => h.RoomTypes)
                 .ThenInclude(rt => rt.Images)
             .Include(h => h.Reviews);
@@ -146,5 +147,7 @@ public class GetHotelDetailsByIdQueryHandler : IRequestHandler<GetHotelDetailsBy
     }
 
     private static bool RoomIsFree(HotelRoom room, DateOnly checkIn, DateOnly checkOut)
-        => !room.BookingRooms.Any(br => br.Booking.CheckInDate < checkOut && br.Booking.CheckOutDate > checkIn);
+        => !room.BookingRooms.Any(br => br.Booking != null
+                                        && br.Booking.CheckInDate < checkOut
+                                        && br.Booking.CheckOutDate > checkIn);
 }

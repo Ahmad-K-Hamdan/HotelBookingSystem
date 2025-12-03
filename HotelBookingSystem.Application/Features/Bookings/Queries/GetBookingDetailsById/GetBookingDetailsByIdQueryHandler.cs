@@ -11,13 +11,16 @@ public class GetBookingDetailsByIdQueryHandler : IRequestHandler<GetBookingDetai
 {
     private readonly IGenericRepository<Booking> _bookingRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IIdentityService _identityService;
 
     public GetBookingDetailsByIdQueryHandler(
         IGenericRepository<Booking> bookingRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IIdentityService identityService)
     {
         _bookingRepository = bookingRepository;
         _currentUserService = currentUserService;
+        _identityService = identityService;
     }
 
     public async Task<BookingDetailsDto> Handle(GetBookingDetailsByIdQuery request, CancellationToken cancellationToken)
@@ -47,6 +50,8 @@ public class GetBookingDetailsByIdQueryHandler : IRequestHandler<GetBookingDetai
             throw new UnauthorizedAccessException("You are not allowed to view this booking.");
         }
 
+        var userGuest = await _identityService.GetUserByIdAsync(booking.Guest.UserId);
+
         var dto = new BookingDetailsDto
         {
             Id = booking.Id,
@@ -67,6 +72,8 @@ public class GetBookingDetailsByIdQueryHandler : IRequestHandler<GetBookingDetai
             StarRating = booking.Hotel.StarRating,
             GuestId = booking.GuestId,
             GuestHomeCountry = booking.Guest.HomeCountry,
+            GuestFullName = $"{userGuest!.FirstName} {userGuest!.LastName}",
+            GuestPassportNumber = booking.Guest.PassportNumber,
             Rooms = booking.BookingRooms
                 .Select(br => new BookingRoomDto
                 {

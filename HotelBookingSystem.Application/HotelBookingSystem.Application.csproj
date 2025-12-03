@@ -20,4 +20,8 @@
 		<ProjectReference Include="..\HotelBookingSystem.Domain\HotelBookingSystem.Domain.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Features\Hotels\Commands\UpdateHotelAmenities\" />
+	</ItemGroup>
+
 </Project>

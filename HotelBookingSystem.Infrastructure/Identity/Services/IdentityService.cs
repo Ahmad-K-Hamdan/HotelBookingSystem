@@ -3,6 +3,7 @@ using HotelBookingSystem.Application.Common.Interfaces;
 using HotelBookingSystem.Application.Common.Models;
 using HotelBookingSystem.Infrastructure.Identity.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Options;
 
 namespace HotelBookingSystem.Infrastructure.Identity.Services;
@@ -262,6 +263,22 @@ public class IdentityService : IIdentityService
             Succeeded = true,
             UserId = user.Id
         };
+    }
+
+    public async Task<string?> GetUserEmailByIdAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        return user?.Email;
+    }
+
+    public async Task<AuthenticatedUser?> GetUserByIdAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user != null)
+        {
+            return new AuthenticatedUser { FirstName = user.FirstName, LastName = user.LastName, Email = user.Email! };
+        }
+        return null;
     }
 
     private async Task<string> GenerateJwtAsync(User user)

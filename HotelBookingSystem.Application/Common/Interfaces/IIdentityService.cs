@@ -12,4 +12,7 @@ public interface IIdentityService
 
     Task SendPasswordResetEmailAsync(string email);
     Task<AuthResult> ResetPasswordAsync(string email, string token, string newPassword);
+
+    Task<string?> GetUserEmailByIdAsync(string userId);
+    Task<AuthenticatedUser?> GetUserByIdAsync(string userId);
 }
